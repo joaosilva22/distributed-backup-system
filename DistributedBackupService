@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -d "bin" ]; then
+    mkdir bin
+fi
+javac *.java -d bin/
+java -cp bin/ DistributedBackupService
