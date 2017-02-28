@@ -2,5 +2,6 @@
 if [ ! -d "bin" ]; then
     mkdir bin
 fi
-javac *.java -d bin/
+rm -Rf bin/*
+javac $(find ./src/* | grep .java) -d bin/
 java -cp bin/ DistributedBackupService
