@@ -1,3 +1,4 @@
+import protocol.Message;
 import protocol.MessageHeader;
 import protocol.MessageBody;
 
@@ -21,9 +22,16 @@ public class DistributedBackupService {
         }
         System.out.println();
 
-        MessageBody body = new MessageBody().setContent("A B C D");
+        byte[] content = "A B C D".getBytes();
+        MessageBody body = new MessageBody().setContent(content);
         byte[] bodyBytes = body.getBytes();
-        for (byte c: bodyBytes) {
+        for (byte c : bodyBytes) {
+            System.out.printf("0x%02X ", c);
+        }
+        System.out.println();
+
+        Message message = new Message().addHeader(header).setBody(body);
+        for (byte c : message.getBytes()) {
             System.out.printf("0x%02X ", c);
         }
         System.out.println();
