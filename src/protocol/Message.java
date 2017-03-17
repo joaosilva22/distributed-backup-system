@@ -50,7 +50,9 @@ public class Message {
                 out.write(header.getBytes());
             }
             out.write(MessageConstants.CRLF.getBytes());
-            out.write(body.getBytes());
+            if (body != null) {
+                out.write(body.getBytes());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
