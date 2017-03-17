@@ -72,6 +72,7 @@ public class FileUtils {
         return chunks;
     }
 
+    // TODO: Apagar isto (eventualmente)
     public static void main(String[] args) {
         try {
             byte[] input = FileUtils.getBitString("/home/joaosilva/todo.org");
