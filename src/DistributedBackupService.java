@@ -1,7 +1,8 @@
 import protocol.Message;
 import protocol.MessageHeader;
 import protocol.MessageBody;
-import protocol.ControlMonitorThread;
+import protocol.ChannelMonitorThread;
+import protocol.RequestDispatcher;
 import utils.FileUtils;
 
 import java.net.UnknownHostException;
@@ -16,29 +17,32 @@ public class DistributedBackupService {
     public static void main(String[] args) {
         if (args.length != 7) {
             System.out.println("Usage: java DistributedBackupService <server_id> <control_addr> <control_port> <backup_addr> <backup_port> <restore_addr> <restore_port>");
-            //return;
+            return;
         }
 
+        // TODO: Handling dos erros de parsing
         int serverId = Integer.parseInt(args[0]);
         
         String controlAddr = args[1];
+        String backupAddr = args[3];
+        String restoreAddr = args[5];
+
         int controlPort = Integer.parseInt(args[2]);
+        int backupPort = Integer.parseInt(args[4]);
+        int restorePort = Integer.parseInt(args[6]);
 
         try {
-            new ControlMonitorThread(controlAddr, controlPort, queue).start();
+            new ChannelMonitorThread(controlAddr, controlPort, queue).start();
+            new ChannelMonitorThread(backupAddr, backupPort, queue).start();
+            new ChannelMonitorThread(restoreAddr, backupPort, queue).start();
+            new RequestDispatcher(queue).start();
         } catch (UnknownHostException e) {
             // TODO: Lidar com esta excecao
+            //       Provavelmente guardar todos os dados e fechar
             e.printStackTrace();
         } catch (IOException e) {
             // TODO: Com esta tambem
             e.printStackTrace();
         }
-        
-        byte[] data = "PUTCHUNK 1.0 1 a 1 1\r\nSTORED 1.0 1 a 1\r\n\r\n ABCD".getBytes(StandardCharsets.UTF_8);
-        Message message = new Message(data);
-        for (byte b : message.getBytes()) {
-            System.out.printf("0x%02X ", b);
-        }
-        System.out.println();
     }
 }

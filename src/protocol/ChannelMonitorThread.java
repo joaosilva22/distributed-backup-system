@@ -7,13 +7,13 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ControlMonitorThread extends Thread {
+public class ChannelMonitorThread extends Thread {
     private String address;
     private int port;
     private ConcurrentLinkedQueue<Message> queue;
     private MulticastSocket socket;
     
-    public ControlMonitorThread(String address, int port, ConcurrentLinkedQueue<Message> queue) throws UnknownHostException, IOException {
+    public ChannelMonitorThread(String address, int port, ConcurrentLinkedQueue<Message> queue) throws UnknownHostException, IOException {
         this.address = address;
         this.port = port;
         this.queue = queue;
@@ -26,9 +26,8 @@ public class ControlMonitorThread extends Thread {
     public void run() {
         // TODO: Isto provavelmente nao devia ser um ciclo infinito
         while (true) {
-            // TODO: O tamanho do buffer devia ser uma constante qualquer
-            //       e provavelmente 512 bytes nao chegam, nao sei
-            byte[] buf = new byte[512];
+            // TODO: Nao sei se este tamanho para buffers funciona
+            byte[] buf = new byte[64 * 1024];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
             try {
