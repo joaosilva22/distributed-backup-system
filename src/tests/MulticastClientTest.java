@@ -18,7 +18,7 @@ public class MulticastClientTest {
 
         InetAddress address = InetAddress.getByName(args[0]);
         int port = Integer.parseInt(args[1]);
-        String msg = "PUTCHUNK 1 1 1 1 1 \r\n \r\n testando o multicast com esta mensagem :^)";
+        String msg = "PUTCHUNK 1 1 1 1 1 \r\n\r\n testando o multicast com esta mensagem :^)";
         byte[] buf = msg.getBytes(StandardCharsets.UTF_8);
         try( MulticastSocket clientSocket = new MulticastSocket(port) ) {
             clientSocket.joinGroup(address);

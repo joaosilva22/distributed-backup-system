@@ -1,5 +1,6 @@
 package protocol;
 
+import communication.Message;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RequestDispatcher extends Thread {
@@ -15,8 +16,8 @@ public class RequestDispatcher extends Thread {
             if (!queue.isEmpty()) {
                 Message message = queue.poll();
                 if (message != null) {
+                    System.out.println("RECEIVED: " + message.getMessageType());
                     for (byte b : message.getBytes()) {
-                        System.out.println("RECEIVED: ");
                         System.out.printf("0x%02X ", b);
                     }
                     System.out.println();

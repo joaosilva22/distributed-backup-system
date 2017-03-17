@@ -1,8 +1,9 @@
-import protocol.Message;
-import protocol.MessageHeader;
-import protocol.MessageBody;
-import protocol.ChannelMonitorThread;
+import communication.Message;
+import communication.MessageHeader;
+import communication.MessageBody;
+import communication.ChannelMonitorThread;
 import protocol.RequestDispatcher;
+import service.FileManager;
 import utils.FileUtils;
 
 import java.net.UnknownHostException;
@@ -22,11 +23,9 @@ public class DistributedBackupService {
 
         // TODO: Handling dos erros de parsing
         int serverId = Integer.parseInt(args[0]);
-        
         String controlAddr = args[1];
         String backupAddr = args[3];
         String restoreAddr = args[5];
-
         int controlPort = Integer.parseInt(args[2]);
         int backupPort = Integer.parseInt(args[4]);
         int restorePort = Integer.parseInt(args[6]);
@@ -34,7 +33,7 @@ public class DistributedBackupService {
         try {
             new ChannelMonitorThread(controlAddr, controlPort, queue).start();
             new ChannelMonitorThread(backupAddr, backupPort, queue).start();
-            new ChannelMonitorThread(restoreAddr, backupPort, queue).start();
+            new ChannelMonitorThread(restoreAddr, restorePort, queue).start();
             new RequestDispatcher(queue).start();
         } catch (UnknownHostException e) {
             // TODO: Lidar com esta excecao
@@ -44,5 +43,8 @@ public class DistributedBackupService {
             // TODO: Com esta tambem
             e.printStackTrace();
         }
+
+        FileManager manager = new FileManager();
+        
     }
 }

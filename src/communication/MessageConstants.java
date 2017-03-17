@@ -1,4 +1,4 @@
-package protocol;
+package communication;
 
 public class MessageConstants {
     public static final String CRLF = "\r\n";

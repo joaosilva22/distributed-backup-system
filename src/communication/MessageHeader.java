@@ -1,4 +1,4 @@
-package protocol;
+package communication;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +28,8 @@ public class MessageHeader {
                 chunkNo = Integer.parseInt(fields.get(4));
                 break;
             // TODO: Fazer parse do resto das mensagens
+            //       Fazer throw de exception quando a mesage type nao
+            //       for algum dos tipos conhecidos
         }
     }
 
@@ -116,5 +118,9 @@ public class MessageHeader {
             }
         }
         return fields;
+    }
+
+    public String getMessageType() {
+        return messageType;
     }
 }

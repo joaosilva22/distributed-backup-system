@@ -1,4 +1,4 @@
-package protocol;
+package communication;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -57,5 +57,11 @@ public class Message {
             e.printStackTrace();
         }
         return out.toByteArray();
+    }
+
+    // TODO: O message type e o message type do primeiro header?
+    //       Para que servem os outros?
+    public String getMessageType() {
+        return this.headers.get(0).getMessageType();
     }
 }
