@@ -1,9 +1,11 @@
 package utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -72,28 +74,12 @@ public class FileUtils {
         return chunks;
     }
 
-    // TODO: Apagar isto (eventualmente)
-    public static void main(String[] args) {
-        try {
-            byte[] input = FileUtils.getBitString("/home/joaosilva/todo.org");
-            byte[] hash = FileUtils.sha256(input);
-            String output = FileUtils.bytesToAsciiString(hash);
-            System.out.println(output.length() + " : " + output);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(FileUtils.getFileId("/home/joaosilva/todo.org"));
+    public static void createFile(String filepath, byte[] data) throws IOException, FileNotFoundException {
+        File file = new File(filepath);
+        file.createNewFile();
 
-        ArrayList<byte[]> chunks = FileUtils.getFileChunks("/home/joaosilva/todo.org", 64000);
-        for (int i = 0; i < chunks.size(); i++) {
-            System.out.println("chunks[" + i + "].length=" + chunks.get(i).length);
-        }
-
-        for (byte[] chunk : chunks) {
-            for (byte c : chunk) {
-                System.out.printf("%c", c);
-            }
-            System.out.printf("<EOC>\n");
-        }
+        FileOutputStream out = new FileOutputStream(file, false);
+        out.write(data);
+        out.close();
     }
 }

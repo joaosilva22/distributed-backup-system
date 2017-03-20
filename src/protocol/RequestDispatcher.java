@@ -16,6 +16,8 @@ public class RequestDispatcher extends Thread {
             if (!queue.isEmpty()) {
                 Message message = queue.poll();
                 if (message != null) {
+                    // TODO: Apagar isto e encaminhar as mensagens para o
+                    //       subprotocolo correcto
                     System.out.println("RECEIVED: " + message.getMessageType());
                     for (byte b : message.getBytes()) {
                         System.out.printf("0x%02X ", b);

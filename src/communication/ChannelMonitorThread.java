@@ -35,7 +35,6 @@ public class ChannelMonitorThread extends Thread {
                 socket.receive(packet);
                 byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
                 Message message = new Message(data);
-                System.out.println();
                 queue.add(message);
             } catch (IOException e) {
                 e.printStackTrace();

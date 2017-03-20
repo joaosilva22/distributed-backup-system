@@ -3,6 +3,7 @@ import communication.MessageHeader;
 import communication.MessageBody;
 import communication.ChannelMonitorThread;
 import protocol.RequestDispatcher;
+import protocol.BackupService;
 import service.FileManager;
 import utils.FileUtils;
 
@@ -11,6 +12,9 @@ import java.io.IOException;
 // TODO: Apagar StandardCharsets, provavelmente nao esta a ser usado
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.RemoteException;
 
 public class DistributedBackupService {
     private static ConcurrentLinkedQueue<Message> queue = new ConcurrentLinkedQueue<>();
@@ -45,6 +49,20 @@ public class DistributedBackupService {
         }
 
         FileManager manager = new FileManager();
-        
+
+        try {
+            BackupService backup = new BackupService();
+            Registry registry = LocateRegistry.getRegistry();
+            registry.bind("Backup", backup);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            byte[] data = "TEST DATA PLEASE IGNORE".getBytes();
+            FileUtils.createFile("./backups/test.txt", data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
