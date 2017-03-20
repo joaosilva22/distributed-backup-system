@@ -1,4 +1,4 @@
-package communication;
+package communications;
 
 import java.net.MulticastSocket;
 import java.net.InetAddress;

@@ -8,8 +8,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
 public class MulticastClientTest {
-
-
     public static void main(String[] args) throws UnknownHostException, InterruptedException {
         if(args.length != 2){
             System.out.println("Usage: MulticastClientTest address port");

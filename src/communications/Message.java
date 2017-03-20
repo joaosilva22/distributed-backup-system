@@ -1,4 +1,4 @@
-package communication;
+package communications;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +8,8 @@ import java.util.ArrayList;
 public class Message {
     private ArrayList<MessageHeader> headers = new ArrayList<>();
     private MessageBody body;
+
+    public Message() {}
 
     public Message(byte[] data) {        
         ByteArrayOutputStream header = new ByteArrayOutputStream();
@@ -59,9 +61,17 @@ public class Message {
         return out.toByteArray();
     }
 
-    // TODO: O message type e o message type do primeiro header?
+    // NOTE: O message type e o message type do primeiro header?
     //       Para que servem os outros?
     public String getMessageType() {
-        return this.headers.get(0).getMessageType();
+        return headers.get(0).getMessageType();
+    }
+
+    public MessageBody getBody() {
+        return body;
+    }
+
+    public ArrayList<MessageHeader> getHeaders() {
+        return headers;
     }
 }

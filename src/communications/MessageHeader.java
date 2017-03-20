@@ -1,4 +1,4 @@
-package communication;
+package communications;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -8,6 +8,8 @@ public class MessageHeader {
     private String messageType = null, fileId = null;
     private Float version = null;
     private Integer senderId = null, chunkNo = null, replicationDeg = null;
+
+    public MessageHeader() {}
 
     public MessageHeader(byte[] data) {
         ArrayList<String> fields = decodeFields(data);
@@ -122,5 +124,25 @@ public class MessageHeader {
 
     public String getMessageType() {
         return messageType;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public Float getVersion() {
+        return version;
+    }
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    public int getChunkNo() {
+        return chunkNo;
+    }
+
+    public int getReplicationDeg() {
+        return replicationDeg;
     }
 }

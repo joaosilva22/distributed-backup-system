@@ -1,10 +1,10 @@
-import communication.Message;
-import communication.MessageHeader;
-import communication.MessageBody;
-import communication.ChannelMonitorThread;
-import protocol.RequestDispatcher;
-import protocol.BackupService;
-import service.FileManager;
+import communications.Message;
+import communications.MessageHeader;
+import communications.MessageBody;
+import communications.ChannelMonitorThread;
+import protocols.RequestDispatcher;
+import services.BackupService;
+import files.FileManager;
 import utils.FileUtils;
 
 import java.net.UnknownHostException;
@@ -38,7 +38,7 @@ public class DistributedBackupService {
             new ChannelMonitorThread(controlAddr, controlPort, queue).start();
             new ChannelMonitorThread(backupAddr, backupPort, queue).start();
             new ChannelMonitorThread(restoreAddr, restorePort, queue).start();
-            new RequestDispatcher(queue).start();
+            new RequestDispatcher(serverId, queue, backupAddr, backupPort, controlAddr, controlPort).start();
         } catch (UnknownHostException e) {
             // TODO: Lidar com esta excecao
             //       Provavelmente guardar todos os dados e fechar

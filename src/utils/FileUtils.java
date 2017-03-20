@@ -55,7 +55,7 @@ public class FileUtils {
     }
 
     // FIXME: Neste momento o tamanho de cada chunk e sempre 64000,
-    // independentemente do numero de bytes que estao no chunk.
+    //        independentemente do numero de bytes que estao no chunk.
     public static ArrayList<byte[]> getFileChunks(String filepath, int size) {
         ArrayList<byte[]> chunks = new ArrayList<>();
         try {
