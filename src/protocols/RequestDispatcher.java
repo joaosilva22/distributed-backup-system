@@ -27,6 +27,9 @@ public class RequestDispatcher extends Thread {
                         case MessageConstants.MessageType.PUTCHUNK:
                             new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
                             break;
+                        case MessageConstants.MessageType.STORED:
+                            new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
+                            break;
                         default:
                             System.out.println("RequestDispatcher error: Unknown message type");
                             break;
