@@ -18,7 +18,7 @@ public class FileManager {
         return files.get(fileId);
     }
 
-    public void saveChunk(String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException {
+    public void saveChunk(int serverId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException {
         FileData file = getFile(fileId);
         if (file == null) {
             file = files.put(fileId, new FileData());
@@ -31,7 +31,19 @@ public class FileManager {
             //       e guardar os metadados desse chunk no hashmap
             String filepath = FileManagerConstants.PATH + fileId + "_" + chunkNo;
             FileUtils.createFile(filepath, data);
-            file.newChunk(chunkNo, 1, replicationDeg);
+            file.newChunk(chunkNo, serverId, replicationDeg);
+        }
+    }
+
+    public void incrementReplicationDeg(int serverId, String fileId, int chunkNo) {
+        FileData file = getFile(fileId);
+        if (file == null) {
+            return;
+        }
+
+        ChunkData chunk = file.getChunk(chunkNo);
+        if (chunk != null) {
+            chunk.incrementReplicationDeg(serverId);
         }
     }
 }

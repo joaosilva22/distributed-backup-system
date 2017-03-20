@@ -31,7 +31,7 @@ public class ChunkBackupSubprotocol {
 
     // TODO: Version nao esta a ser usado para nada...
     // TODO: Nao dar throw destas exception, mas em vez disso lidar com elas
-    public void putChunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws UnknownHostException, SocketException, IOException {
+    public void initPutchunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws UnknownHostException, SocketException, IOException {
         boolean done = false;
         int iteration = 0;
         // TODO: Substituir este magic number por uma constante
@@ -85,21 +85,22 @@ public class ChunkBackupSubprotocol {
         
     }
 
-    public void storeChunk(Message message) {
+    public void putchunk(Message request) {
         // TODO: O version da mensagem nao esta a ser utilizado para nada
         //       para ja...
-        MessageHeader header = message.getHeaders().get(0);
-        float version = header.getVersion();
-        int senderId = header.getSenderId();
-        String fileId = header.getFileId();
-        int chunkNo = header.getChunkNo();
-        int replicationDeg = header.getReplicationDeg();
+        MessageHeader requestHeader = request.getHeaders().get(0);
+               
+        String fileId = requestHeader.getFileId();
+        float version = requestHeader.getVersion();
+        int senderId = requestHeader.getSenderId();
+        int chunkNo = requestHeader.getChunkNo();
+        int replicationDeg = requestHeader.getReplicationDeg();
         
-        byte[] data = message.getBody().getBytes();
+        byte[] data = request.getBody().getBytes();
 
         if (senderId != serverId) {
             try {
-                fileManager.saveChunk(fileId, chunkNo, replicationDeg, data);
+                fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
             } catch (IOException e) {
                 System.out.println("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
@@ -129,7 +130,7 @@ public class ChunkBackupSubprotocol {
             InetAddress inetaddress = InetAddress.getByName(mcAddr);
             DatagramSocket socket = new DatagramSocket(mcPort, inetaddress);
 
-            byte[] buf = message.getBytes();
+            byte[] buf = response.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             socket.send(packet);
         } catch (UnknownHostException e) {
@@ -142,5 +143,18 @@ public class ChunkBackupSubprotocol {
             System.out.println("ChunkBackupSubprotocol error: " + e.toString());
             e.printStackTrace();
         }
+    }
+
+    public void stored(Message request) {
+        MessageHeader requestHeader = request.getHeaders().get(0);
+
+        String fileId = requestHeader.getFileId();
+        // TODO: O version da mensagem nao esta a ser utilizado para nada
+        //       para ja...
+        // float version = requestHeader.getVersion();
+        int senderId = requestHeader.getSenderId();
+        int chunkNo = requestHeader.getChunkNo();
+
+        fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
     }
 }
