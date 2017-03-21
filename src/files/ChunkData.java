@@ -7,7 +7,13 @@ public class ChunkData {
     private ArrayList<Integer> replicationDeg;
     private int desiredReplicationDeg;
 
+    public ChunkData(int desiredReplicationDeg) {
+        replicationDeg = new ArrayList<>();
+        this.desiredReplicationDeg = desiredReplicationDeg;
+    }
+
     public ChunkData(int serverId, int desiredReplicationDeg) {
+        replicationDeg = new ArrayList<>();
         this.replicationDeg.add(serverId);
         this.desiredReplicationDeg = desiredReplicationDeg;
     }

@@ -19,14 +19,18 @@ public class Message {
             //       acessos a indices fora da array (ou dar throw e lidar
             //       com o problema noutro lado qualquer ;-D)
             if (data[i] == MessageConstants.CR && data[i + 1] == MessageConstants.LF) {
+                header.write(data[i]);
+                header.write(data[i+1]);
+                headers.add(new MessageHeader(header.toByteArray()));
                 if (data[i + 2] == MessageConstants.CR && data[i + 3] == MessageConstants.LF) {
-                    byte[] bodyBytes = Arrays.copyOfRange(data, i + 4, data.length);
-                    body = new MessageBody().setContent(bodyBytes);
+                    if (i + 4 < data.length) {
+                        byte[] bodyBytes = Arrays.copyOfRange(data, i + 4, data.length);
+                        body = new MessageBody().setContent(bodyBytes);
+                    } else {
+                        body = new MessageBody();
+                    }
+                    break;
                 } else {
-                    header.write(data[i]);
-                    header.write(data[i+1]);
-                    i += 1;
-                    headers.add(new MessageHeader(header.toByteArray()));
                     header.reset();
                 }
             } else {

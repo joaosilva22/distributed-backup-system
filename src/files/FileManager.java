@@ -1,5 +1,6 @@
 package files;
 
+import main.DistributedBackupService;
 import utils.FileUtils;
 
 import java.io.File;
@@ -18,10 +19,27 @@ public class FileManager {
         return files.get(fileId);
     }
 
+    public void registerChunk(int serverId, String fileId, int chunkNo, int replicationDeg) {
+        // TODO: Quando um peer inicia o protocolo de putchunk, com
+        //       um ficheiro que ja deu backup (identificado pelo fileId),
+        //       atualizar os metadados desse ficheiro? Ou entao dar um erro
+        FileData file = getFile(fileId);
+        if (file == null) {
+            files.put(fileId, new FileData());
+            file = getFile(fileId);
+        }
+
+        ChunkData chunk = file.getChunk(chunkNo);
+        if (chunk == null) {
+            file.newChunk(chunkNo, replicationDeg);
+        }
+    }
+
     public void saveChunk(int serverId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException {
         FileData file = getFile(fileId);
         if (file == null) {
-            file = files.put(fileId, new FileData());
+            files.put(fileId, new FileData());
+            file = getFile(fileId);
         }
 
         ChunkData chunk = file.getChunk(chunkNo);

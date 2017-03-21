@@ -73,11 +73,6 @@ public class MessageHeader {
             builder.append(" ");
         }
 
-        if (fileId != null) {
-            builder.append(fileId);
-            builder.append(" ");
-        }
-
         if (version != null) {
             builder.append(version.toString());
             builder.append(" ");
@@ -85,6 +80,11 @@ public class MessageHeader {
 
         if (senderId != null) {
             builder.append(senderId.toString());
+            builder.append(" ");
+        }
+
+        if (fileId != null) {
+            builder.append(fileId);
             builder.append(" ");
         }
 
