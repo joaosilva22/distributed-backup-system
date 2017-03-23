@@ -71,7 +71,6 @@ public class FileUtils {
                 numRead += read;
                 chunk = new byte[size];
             }
-            System.out.println("numRead is " + numRead);
             if (numRead % size == 0) {
                 chunk = new byte[size];
                 chunks.add(chunk);

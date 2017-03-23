@@ -27,11 +27,9 @@ public class RequestDispatcher extends Thread {
                 if (message != null) {
                     switch (message.getMessageType()) {
                         case MessageConstants.MessageType.PUTCHUNK:
-                            IOUtils.log("Received PUTCHUNK");
                             new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
                             break;
                         case MessageConstants.MessageType.STORED:
-                            IOUtils.log("Received STORED");
                             new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
                             break;
                         default:

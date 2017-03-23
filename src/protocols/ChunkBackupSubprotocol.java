@@ -35,6 +35,7 @@ public class ChunkBackupSubprotocol {
 
     // TODO: Version nao esta a ser usado para nada...
     public void initPutchunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) {
+        IOUtils.log("Initiating PUTCHUNK <" + fileId + ", " + chunkNo + ">");
         boolean done = false;
         int iteration = 0;
         // TODO: Substituir este magic number por uma constante
@@ -70,13 +71,13 @@ public class ChunkBackupSubprotocol {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdbPort);
                 socket.send(packet);
             } catch (UnknownHostException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (SocketException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (IOException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -86,7 +87,7 @@ public class ChunkBackupSubprotocol {
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -102,13 +103,13 @@ public class ChunkBackupSubprotocol {
                 iteration++;
                 delay *= 2;
                 if (iteration < 5) {
-                    IOUtils.log("Failed to hit desired replication degree, retrying...");
+                    IOUtils.warn("Failed to hit target replication deg, retrying <" + fileId + ", " + chunkNo + ">");
                 } else {
-                    IOUtils.log("Failed to hit desired replication degree, aborting");
+                    IOUtils.warn("Failed to hit target replication deg, aborting <" + fileId + ", " + chunkNo + ">");
                 }
             }
         }
-        
+        IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
     }
 
     public void putchunk(Message request) {
@@ -124,11 +125,13 @@ public class ChunkBackupSubprotocol {
         
         byte[] data = request.getBody().getBytes();
 
+        IOUtils.log("Received PUTCHUNK <" + fileId + ", " + chunkNo + ">");
+
         if (senderId != serverId) {
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
             } catch (IOException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -147,7 +150,7 @@ public class ChunkBackupSubprotocol {
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -159,13 +162,13 @@ public class ChunkBackupSubprotocol {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
                 socket.send(packet);
             } catch (UnknownHostException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (SocketException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (IOException e) {
-                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
         }
@@ -180,6 +183,8 @@ public class ChunkBackupSubprotocol {
         // float version = requestHeader.getVersion();
         int senderId = requestHeader.getSenderId();
         int chunkNo = requestHeader.getChunkNo();
+
+        IOUtils.log("Received STORED <" + fileId + ", " + chunkNo + ">");
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
     }

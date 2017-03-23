@@ -25,8 +25,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         //       chunkBackupSubprotocol para cada um deles.
         String fileId = FileUtils.getFileId(filepath);
         // TODO: Substituir 64000 por uma constante
-        ArrayList<byte[]> chunks = FileUtils.getFileChunks(filepath, 64000);
-        System.out.println("CHUNKS.SIZE=" + chunks.size());
+        ArrayList<byte[]> chunks = FileUtils.getFileChunks(filepath, BackupServiceConstants.CHUNK_SIZE);
 
         for (int i = 0; i < chunks.size(); i++) {
             final int chunkNo = i;
