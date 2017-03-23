@@ -6,6 +6,9 @@ import communications.MessageHeader;
 import communications.MessageBody;
 import communications.MessageConstants;
 import files.FileManager;
+import files.FileData;
+import files.ChunkData;
+import utils.IOUtils;
 
 import java.net.InetAddress;
 import java.net.DatagramSocket;
@@ -67,13 +70,13 @@ public class ChunkBackupSubprotocol {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdbPort);
                 socket.send(packet);
             } catch (UnknownHostException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (SocketException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (IOException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -83,9 +86,14 @@ public class ChunkBackupSubprotocol {
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
+
+            FileData file = fileManager.getFile(fileId);
+            if (file == null) { IOUtils.log("File is null"); }
+            ChunkData chunk = file.getChunk(chunkNo);
+            if (chunk == null) { IOUtils.log("Chunk is null"); }
             
             int currentReplicationDeg = fileManager.getFile(fileId).getChunk(chunkNo).getReplicationDeg();
             if (currentReplicationDeg >= replicationDeg) {
@@ -94,9 +102,9 @@ public class ChunkBackupSubprotocol {
                 iteration++;
                 delay *= 2;
                 if (iteration < 5) {
-                    System.out.println("CHUNK(" + fileId + ", " + chunkNo + "): FAILED TO HIT DESIRED REPLICATION DEGREE. RETRYING...");
+                    IOUtils.log("Failed to hit desired replication degree, retrying...");
                 } else {
-                    System.out.println("CHUNK(" + fileId + ", " + chunkNo + "): FAILED TO HIT DESIRED REPLICATION DEGREE");
+                    IOUtils.log("Failed to hit desired replication degree, aborting");
                 }
             }
         }
@@ -120,7 +128,7 @@ public class ChunkBackupSubprotocol {
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
             } catch (IOException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -139,7 +147,7 @@ public class ChunkBackupSubprotocol {
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
 
@@ -151,13 +159,13 @@ public class ChunkBackupSubprotocol {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
                 socket.send(packet);
             } catch (UnknownHostException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (SocketException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             } catch (IOException e) {
-                System.out.println("ChunkBackupSubprotocol error: " + e.toString());
+                IOUtils.log("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
         }

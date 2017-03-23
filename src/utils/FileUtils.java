@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtils {
+    private FileUtils() {}
+    
     private static byte[] getBitString(String filepath) throws IOException {
         Path path = Paths.get(filepath);
         BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
@@ -47,28 +49,38 @@ public class FileUtils {
             byte[] hash = FileUtils.sha256(input);
             output = FileUtils.bytesToAsciiString(hash);
         } catch (IOException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         }
         return output;
     }
 
-    // FIXME: Neste momento o tamanho de cada chunk e sempre 64000,
-    //        independentemente do numero de bytes que estao no chunk.
+    // TODO: Neste momento o tamanho de cada chunk e sempre 64000,
+    //       independentemente do numero de bytes que estao no chunk.
     public static ArrayList<byte[]> getFileChunks(String filepath, int size) {
         ArrayList<byte[]> chunks = new ArrayList<>();
+        int numRead = 0, read = 0;
         try {
             InputStream stream = new FileInputStream(filepath);
             byte[] chunk = new byte[size];
-            chunks.add(chunk);
-            while (stream.read(chunk) != -1) {
+            while ((read = stream.read(chunk)) != -1) {
+                chunks.add(chunk);
+                numRead += read;
+                chunk = new byte[size];
+            }
+            System.out.println("numRead is " + numRead);
+            if (numRead % size == 0) {
                 chunk = new byte[size];
                 chunks.add(chunk);
             }
         } catch (FileNotFoundException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         } catch (IOException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         }
         return chunks;

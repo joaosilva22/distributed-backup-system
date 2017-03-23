@@ -26,13 +26,14 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         String fileId = FileUtils.getFileId(filepath);
         // TODO: Substituir 64000 por uma constante
         ArrayList<byte[]> chunks = FileUtils.getFileChunks(filepath, 64000);
+        System.out.println("CHUNKS.SIZE=" + chunks.size());
 
-        System.out.println("BACKING UP " + chunks.size() + " CHUNKS");
         for (int i = 0; i < chunks.size(); i++) {
+            final int chunkNo = i;
+            final byte[] chunk = chunks.get(i);
             // TODO: Provavelmente aqui a versao nao devia ser uma constante
             //       mas por outro lado nao sei o que devia ser
-            final int chunkNo = i;
-            new Thread(() -> chunkBackupSubprotocol.initPutchunk(1.0f, serverId, fileId, chunkNo, replicationDeg, chunks.get(chunkNo))).start();
+            new Thread(() -> chunkBackupSubprotocol.initPutchunk(1.0f, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
         }
     }
 

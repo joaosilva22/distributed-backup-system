@@ -4,6 +4,7 @@ import main.DistributedBackupService;
 import communications.Message;
 import communications.MessageConstants;
 import files.FileManager;
+import utils.IOUtils;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -26,15 +27,15 @@ public class RequestDispatcher extends Thread {
                 if (message != null) {
                     switch (message.getMessageType()) {
                         case MessageConstants.MessageType.PUTCHUNK:
-                            System.out.println("RECEIVED PUTCHUNK");
+                            IOUtils.log("Received PUTCHUNK");
                             new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
                             break;
                         case MessageConstants.MessageType.STORED:
-                            System.out.println("RECEIVED STORED");
+                            IOUtils.log("Received STORED");
                             new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
                             break;
                         default:
-                            System.out.println("RequestDispatcher error: Unknown message type");
+                            IOUtils.log("RequestDispatcher error: Unknown message type");
                             break;
                     }
                 }
