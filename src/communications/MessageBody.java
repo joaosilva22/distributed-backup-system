@@ -1,4 +1,4 @@
-package protocol;
+package communications;
 
 import java.nio.charset.StandardCharsets;
 

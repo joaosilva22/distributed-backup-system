@@ -1,4 +1,4 @@
-package protocol;
+package communications;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +9,8 @@ public class Message {
     private ArrayList<MessageHeader> headers = new ArrayList<>();
     private MessageBody body;
 
+    public Message() {}
+
     public Message(byte[] data) {        
         ByteArrayOutputStream header = new ByteArrayOutputStream();
         for (int i = 0; i < data.length; i++) {
@@ -17,14 +19,18 @@ public class Message {
             //       acessos a indices fora da array (ou dar throw e lidar
             //       com o problema noutro lado qualquer ;-D)
             if (data[i] == MessageConstants.CR && data[i + 1] == MessageConstants.LF) {
+                header.write(data[i]);
+                header.write(data[i+1]);
+                headers.add(new MessageHeader(header.toByteArray()));
                 if (data[i + 2] == MessageConstants.CR && data[i + 3] == MessageConstants.LF) {
-                    byte[] bodyBytes = Arrays.copyOfRange(data, i + 4, data.length);
-                    body = new MessageBody().setContent(bodyBytes);
+                    if (i + 4 < data.length) {
+                        byte[] bodyBytes = Arrays.copyOfRange(data, i + 4, data.length);
+                        body = new MessageBody().setContent(bodyBytes);
+                    } else {
+                        body = new MessageBody();
+                    }
+                    break;
                 } else {
-                    header.write(data[i]);
-                    header.write(data[i+1]);
-                    i += 1;
-                    headers.add(new MessageHeader(header.toByteArray()));
                     header.reset();
                 }
             } else {
@@ -57,5 +63,19 @@ public class Message {
             e.printStackTrace();
         }
         return out.toByteArray();
+    }
+
+    // NOTE: O message type e o message type do primeiro header?
+    //       Para que servem os outros?
+    public String getMessageType() {
+        return headers.get(0).getMessageType();
+    }
+
+    public MessageBody getBody() {
+        return body;
+    }
+
+    public ArrayList<MessageHeader> getHeaders() {
+        return headers;
     }
 }

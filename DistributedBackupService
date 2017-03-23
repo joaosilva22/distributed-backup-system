@@ -6,4 +6,4 @@ fi
 rm -Rf bin/*
 
 javac $(find ./src/* | grep .java) -d bin/
-java -cp bin/ DistributedBackupService ${@:1}
+java -cp bin/ main.DistributedBackupService ${@:1}

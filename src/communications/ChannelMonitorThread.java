@@ -1,10 +1,11 @@
-package protocol;
+package communications;
 
 import java.net.MulticastSocket;
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.UnknownHostException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ChannelMonitorThread extends Thread {
@@ -32,7 +33,8 @@ public class ChannelMonitorThread extends Thread {
 
             try {
                 socket.receive(packet);
-                Message message = new Message(packet.getData());
+                byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
+                Message message = new Message(data);
                 queue.add(message);
             } catch (IOException e) {
                 e.printStackTrace();

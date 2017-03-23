@@ -1,4 +1,4 @@
-package protocol;
+package communications;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -8,6 +8,8 @@ public class MessageHeader {
     private String messageType = null, fileId = null;
     private Float version = null;
     private Integer senderId = null, chunkNo = null, replicationDeg = null;
+
+    public MessageHeader() {}
 
     public MessageHeader(byte[] data) {
         ArrayList<String> fields = decodeFields(data);
@@ -28,6 +30,8 @@ public class MessageHeader {
                 chunkNo = Integer.parseInt(fields.get(4));
                 break;
             // TODO: Fazer parse do resto das mensagens
+            //       Fazer throw de exception quando a mesage type nao
+            //       for algum dos tipos conhecidos
         }
     }
 
@@ -69,11 +73,6 @@ public class MessageHeader {
             builder.append(" ");
         }
 
-        if (fileId != null) {
-            builder.append(fileId);
-            builder.append(" ");
-        }
-
         if (version != null) {
             builder.append(version.toString());
             builder.append(" ");
@@ -81,6 +80,11 @@ public class MessageHeader {
 
         if (senderId != null) {
             builder.append(senderId.toString());
+            builder.append(" ");
+        }
+
+        if (fileId != null) {
+            builder.append(fileId);
             builder.append(" ");
         }
 
@@ -116,5 +120,29 @@ public class MessageHeader {
             }
         }
         return fields;
+    }
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public Float getVersion() {
+        return version;
+    }
+
+    public int getSenderId() {
+        return senderId;
+    }
+
+    public int getChunkNo() {
+        return chunkNo;
+    }
+
+    public int getReplicationDeg() {
+        return replicationDeg;
     }
 }

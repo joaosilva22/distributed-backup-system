@@ -1,9 +1,11 @@
 package utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,6 +16,8 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class FileUtils {
+    private FileUtils() {}
+    
     private static byte[] getBitString(String filepath) throws IOException {
         Path path = Paths.get(filepath);
         BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
@@ -45,55 +49,49 @@ public class FileUtils {
             byte[] hash = FileUtils.sha256(input);
             output = FileUtils.bytesToAsciiString(hash);
         } catch (IOException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         }
         return output;
     }
 
-    // FIXME: Neste momento o tamanho de cada chunk e sempre 64000,
-    // independentemente do numero de bytes que estao no chunk.
+    // TODO: Neste momento o tamanho de cada chunk e sempre 64000,
+    //       independentemente do numero de bytes que estao no chunk.
     public static ArrayList<byte[]> getFileChunks(String filepath, int size) {
         ArrayList<byte[]> chunks = new ArrayList<>();
+        int numRead = 0, read = 0;
         try {
             InputStream stream = new FileInputStream(filepath);
             byte[] chunk = new byte[size];
-            chunks.add(chunk);
-            while (stream.read(chunk) != -1) {
+            while ((read = stream.read(chunk)) != -1) {
+                chunks.add(chunk);
+                numRead += read;
+                chunk = new byte[size];
+            }
+            System.out.println("numRead is " + numRead);
+            if (numRead % size == 0) {
                 chunk = new byte[size];
                 chunks.add(chunk);
             }
         } catch (FileNotFoundException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         } catch (IOException e) {
+            IOUtils.log("FileUtils error: " + e.toString());
             e.printStackTrace();
         }
         return chunks;
     }
 
-    // TODO: Apagar isto (eventualmente)
-    public static void main(String[] args) {
-        try {
-            byte[] input = FileUtils.getBitString("/home/joaosilva/todo.org");
-            byte[] hash = FileUtils.sha256(input);
-            String output = FileUtils.bytesToAsciiString(hash);
-            System.out.println(output.length() + " : " + output);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println(FileUtils.getFileId("/home/joaosilva/todo.org"));
+    public static void createFile(String filepath, byte[] data) throws IOException, FileNotFoundException {
+        File file = new File(filepath);
+        file.createNewFile();
 
-        ArrayList<byte[]> chunks = FileUtils.getFileChunks("/home/joaosilva/todo.org", 64000);
-        for (int i = 0; i < chunks.size(); i++) {
-            System.out.println("chunks[" + i + "].length=" + chunks.get(i).length);
-        }
-
-        for (byte[] chunk : chunks) {
-            for (byte c : chunk) {
-                System.out.printf("%c", c);
-            }
-            System.out.printf("<EOC>\n");
-        }
+        FileOutputStream out = new FileOutputStream(file, false);
+        out.write(data);
+        out.close();
     }
 }
