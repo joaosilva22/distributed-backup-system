@@ -47,7 +47,7 @@ public class FileManager {
             // TODO: Criar um novo ficheiro para guardar o chunk
             //       (tipo fileManager.saveChunk(data) ou assim)
             //       e guardar os metadados desse chunk no hashmap
-            String filepath = FileManagerConstants.PATH + fileId + "_" + chunkNo;
+            String filepath = FileManagerConstants.PATH + getChunkFileName(fileId, chunkNo);
             FileUtils.createFile(filepath, data);
             file.newChunk(chunkNo, serverId, replicationDeg);
         }
@@ -58,10 +58,34 @@ public class FileManager {
         if (file == null) {
             return;
         }
-
         ChunkData chunk = file.getChunk(chunkNo);
         if (chunk != null) {
             chunk.incrementReplicationDeg(serverId);
         }
+    }
+
+    public byte[] retrieveChunkData(String fileId, int chunkNo) {
+        FileData file = getFile(fileId);
+        if (fileData == null) {
+            return null;
+        }
+        ChunkData chunk = file.getChunk(chunkNo);
+        if (chunk == null) {
+            return null;
+        }
+
+        String path = FileManagerConstants.PATH + getChunkFileName(fileId, chunkNo);
+        try {
+            byte[] data = FileUtils.readFile(path);
+        } catch (IOException e) {
+            IOUtils.err("FileManager err: " + e.toString);
+            e.printStackTrace();
+            return null;
+        }
+        return data;
+    }
+
+    private String getChunkFileName(String fileId, int chunkNo) {
+        return fileId + "_" + chunkNo;
     }
 }

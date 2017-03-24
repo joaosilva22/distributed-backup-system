@@ -66,7 +66,6 @@ public class ChunkBackupSubprotocol {
                 //       como argumento?
                 InetAddress inetaddress = InetAddress.getByName(mdbAddr);
                 DatagramSocket socket = new DatagramSocket();
-            
                 byte[] buf = message.getBytes();
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdbPort);
                 socket.send(packet);
@@ -91,6 +90,8 @@ public class ChunkBackupSubprotocol {
                 e.printStackTrace();
             }
 
+            // TODO: Apagar isto quando descobrir porque e que as vezes
+            //       isto da um NullPointerException
             FileData file = fileManager.getFile(fileId);
             if (file == null) { IOUtils.log("File is null"); }
             ChunkData chunk = file.getChunk(chunkNo);
@@ -109,7 +110,10 @@ public class ChunkBackupSubprotocol {
                 }
             }
         }
-        IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+
+        if (done) {
+            IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+        }
     }
 
     public void putchunk(Message request) {

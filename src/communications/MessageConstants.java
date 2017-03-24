@@ -9,6 +9,8 @@ public class MessageConstants {
     public class MessageType {
         public static final String PUTCHUNK = "PUTCHUNK";
         public static final String STORED = "STORED";
+        public static final String GETCHUNK = "GETCHUNK";
+        public static final String CHUNK = "CHUNK";
         // TODO: Adicionar o resto dos message types
         // ...
     }

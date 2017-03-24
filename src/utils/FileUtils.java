@@ -93,4 +93,8 @@ public class FileUtils {
         out.write(data);
         out.close();
     }
+
+    public static byte[] readFile(String filepath) throws IOException {
+        return Files.readAllBytes(Paths.get(filepath));
+    }
 }

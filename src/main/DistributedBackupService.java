@@ -6,6 +6,7 @@ import communications.MessageBody;
 import communications.ChannelMonitorThread;
 import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
+import protocols.ChunkRestoreSubprotocol;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
@@ -30,6 +31,7 @@ public class DistributedBackupService {
     private static ConcurrentLinkedQueue<Message> queue;
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
+    private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
 
     public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) {
         this.serverId = serverId;
@@ -43,6 +45,7 @@ public class DistributedBackupService {
         queue = new ConcurrentLinkedQueue<>();
         fileManager = new FileManager();
         chunkBackupSubprotocol = new ChunkBackupSubprotocol(this);
+        chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
     }
 
     public void init() {
@@ -116,6 +119,10 @@ public class DistributedBackupService {
     public ChunkBackupSubprotocol getChunkBackupSubprotocol() {
         return chunkBackupSubprotocol;
     }
+
+    public ChunkRestoreSubprotocol getChunkRestoreSubprotocol() {
+        return chunkRestoreSubprotocol;
+    }
         
     public static void main(String[] args) {
         if (args.length != 7) {
@@ -130,6 +137,6 @@ public class DistributedBackupService {
         IOUtils.log("Starting server (id=" + service.serverId + ") with params:");
         IOUtils.log("Multicast Control Channel: <" + service.mcAddr + ", " + service.mcPort + ">");
         IOUtils.log("Multicast Data Backup Channel: <" + service.mdbAddr + ", " + service.mdbPort + ">");
-        IOUtils.log("Multicast Data Restore Channel: <" + service.mdrAddr + ", " + service.mdrPort + ">");
+        IOUtils.log("Multicast Data Recovery Channel: <" + service.mdrAddr + ", " + service.mdrPort + ">");
     }
 }
