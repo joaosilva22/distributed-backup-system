@@ -3,6 +3,7 @@ package services;
 import main.DistributedBackupService;
 import utils.FileUtils;
 import protocols.ChunkBackupSubprotocol;
+import protocols.ChunkRestoreSubprotocol;
 import files.FileManager;
 
 import java.rmi.RemoteException;
@@ -13,9 +14,11 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
     private int serverId;
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
+    private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
     
     public BackupService(DistributedBackupService service) throws RemoteException {
         chunkBackupSubprotocol = service.getChunkBackupSubprotocol();
+        chunkRestoreSubprotocol = service.getChunkRestoreSubprotocol();
         serverId = service.getServerId();
         fileManager = service.getFileManager();
     }
@@ -25,8 +28,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         //       chunkBackupSubprotocol para cada um deles.
         String fileId = FileUtils.getFileId(filepath);
         // TODO: Substituir 64000 por uma constante
-        ArrayList<byte[]> chunks = FileUtils.getFileChunks(filepath, 64000);
-        System.out.println("CHUNKS.SIZE=" + chunks.size());
+        ArrayList<byte[]> chunks = FileUtils.getFileChunks(filepath, BackupServiceConstants.CHUNK_SIZE);
 
         for (int i = 0; i < chunks.size(); i++) {
             final int chunkNo = i;
@@ -35,6 +37,14 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             //       mas por outro lado nao sei o que devia ser
             new Thread(() -> chunkBackupSubprotocol.initPutchunk(1.0f, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
         }
+    }
+
+    public void restoreFile(String filepath) {
+        // TODO: Get file id devia funcionar apenas com o nome do ficheiro
+        //       e nao utilizar todo o caminho, e nao sei se ja funciona assim
+        String fileId = FileUtils.getFileId(filepath);
+        int chunkNo = 0;
+        new Thread(() -> chunkRestoreSubprotocol.initGetchunk(1.0f, serverId, fileId, chunkNo)).start();
     }
 
     // TODO: Adicionar os metodos relativos aos restantes protocolos

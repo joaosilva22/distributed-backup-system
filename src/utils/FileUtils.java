@@ -71,7 +71,6 @@ public class FileUtils {
                 numRead += read;
                 chunk = new byte[size];
             }
-            System.out.println("numRead is " + numRead);
             if (numRead % size == 0) {
                 chunk = new byte[size];
                 chunks.add(chunk);
@@ -93,5 +92,9 @@ public class FileUtils {
         FileOutputStream out = new FileOutputStream(file, false);
         out.write(data);
         out.close();
+    }
+
+    public static byte[] readFile(String filepath) throws IOException {
+        return Files.readAllBytes(Paths.get(filepath));
     }
 }

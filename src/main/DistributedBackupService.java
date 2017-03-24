@@ -6,6 +6,7 @@ import communications.MessageBody;
 import communications.ChannelMonitorThread;
 import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
+import protocols.ChunkRestoreSubprotocol;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
@@ -13,13 +14,16 @@ import utils.IOUtils;
 
 import java.net.UnknownHostException;
 import java.io.IOException;
-// TODO: Apagar StandardCharsets, provavelmente nao esta a ser usado
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.server.ExportException;
 
 public class DistributedBackupService {
+    private static final int RMI_PORT = 1099;
+    
     private int serverId;
     private String mcAddr, mdbAddr, mdrAddr;
     private int mcPort, mdbPort, mdrPort;
@@ -27,6 +31,7 @@ public class DistributedBackupService {
     private static ConcurrentLinkedQueue<Message> queue;
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
+    private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
 
     public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) {
         this.serverId = serverId;
@@ -40,6 +45,7 @@ public class DistributedBackupService {
         queue = new ConcurrentLinkedQueue<>();
         fileManager = new FileManager();
         chunkBackupSubprotocol = new ChunkBackupSubprotocol(this);
+        chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
     }
 
     public void init() {
@@ -49,18 +55,27 @@ public class DistributedBackupService {
             new ChannelMonitorThread(mdrAddr, mdrPort, queue).start();
             new RequestDispatcher(this).start();
         } catch (UnknownHostException e) {
-            IOUtils.log("DistributedBackupService error: " + e.toString());
+            IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
         } catch (IOException e) {
-            IOUtils.log("DistributedBackupService error: " + e.toString());
+            IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
         }
 
+        Registry registry;
         try {
             BackupService backup = new BackupService(this);
-            Registry registry = LocateRegistry.getRegistry();
-            registry.bind("Backup", backup);
-        } catch (Exception e) {
+            try {
+                registry = LocateRegistry.createRegistry(RMI_PORT);
+                registry.bind("Backup", backup);
+            } catch (ExportException e) {
+                IOUtils.warn("DistributedBackupService warning: " + e.toString());
+                registry = LocateRegistry.getRegistry(RMI_PORT);
+            } catch (AlreadyBoundException e) {
+                IOUtils.warn("DistributedBackupService warning: " + e.toString());
+            }
+        } catch (RemoteException e) {
+            IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
         }
     }
@@ -104,6 +119,10 @@ public class DistributedBackupService {
     public ChunkBackupSubprotocol getChunkBackupSubprotocol() {
         return chunkBackupSubprotocol;
     }
+
+    public ChunkRestoreSubprotocol getChunkRestoreSubprotocol() {
+        return chunkRestoreSubprotocol;
+    }
         
     public static void main(String[] args) {
         if (args.length != 7) {
@@ -111,10 +130,13 @@ public class DistributedBackupService {
             return;
         }
 
-        IOUtils.log("Began service...");
-
         // TODO: Handling dos erros de parsing
         DistributedBackupService service = new DistributedBackupService(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
         service.init();
+
+        IOUtils.log("Starting server (id=" + service.serverId + ") with params:");
+        IOUtils.log("Multicast Control Channel: <" + service.mcAddr + ", " + service.mcPort + ">");
+        IOUtils.log("Multicast Data Backup Channel: <" + service.mdbAddr + ", " + service.mdbPort + ">");
+        IOUtils.log("Multicast Data Recovery Channel: <" + service.mdrAddr + ", " + service.mdrPort + ">");
     }
 }
