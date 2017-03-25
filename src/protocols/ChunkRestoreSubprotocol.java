@@ -3,6 +3,7 @@ package protocols;
 import main.DistributedBackupService;
 import utils.IOUtils;
 import communications.MessageHeader;
+import communications.MessageBody;
 import communications.Message;
 import communications.MessageConstants;
 import files.FileManager;
@@ -58,10 +59,12 @@ public class ChunkRestoreSubprotocol {
             IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
             e.printStackTrace();
         }
+
+        fileManager.expectChunk(fileId, chunkNo);
     }
 
     public void getchunk(Message request) {
-        // TODO: O version da mensagem nao esta a ser utilizado para nada
+        // TODO: A version da mensagem nao esta a ser utilizado para nada
         //       para ja...
         MessageHeader requestHeader = request.getHeaders().get(0);
         String fileId = requestHeader.getFileId();
@@ -73,6 +76,58 @@ public class ChunkRestoreSubprotocol {
 
         if (senderId != serverId) {
             byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
+            if (data != null) {
+                MessageHeader header = new MessageHeader()
+                    .setMessageType(MessageConstants.MessageType.CHUNK)
+                    .setVersion(version)
+                    .setSenderId(serverId)
+                    .setFileId(fileId)
+                    .setChunkNo(chunkNo);
+
+                MessageBody body = new MessageBody()
+                    .setContent(data);
+
+                Message message = new Message()
+                    .addHeader(header)
+                    .setBody(body);
+
+                try {
+                    // TODO: Estou a criar uma socket de cada vez que inicio um
+                    //       putchunk... Se calhar era melhor receber a socket
+                    //       como argumento?
+                    InetAddress inetaddress = InetAddress.getByName(mdrAddr);
+                    DatagramSocket socket = new DatagramSocket();
+                    byte[] buf = message.getBytes();
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdrPort);
+                    socket.send(packet);
+                } catch (UnknownHostException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                } catch (SocketException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void chunk(Message request) {
+        MessageHeader requestHeader = request.getHeaders().get(0);
+        String fileId = requestHeader.getFileId();
+        float version = requestHeader.getVersion();
+        int senderId = requestHeader.getSenderId();
+        int chunkNo = requestHeader.getChunkNo();
+        byte[] data = request.getBody().getBytes();
+        
+        IOUtils.log("Received CHUNK <" + fileId + ", " + chunkNo + ">");
+
+        // TODO: Se este servidor estiver à espera de um chunk, e se o chunk
+        //       que está à espera corresponder com um dos que foi enviado
+        //       então guardar o chunk
+        if (fileManager.isExpectingChunk(fileId, chunkNo)) {
         }
     }
 }

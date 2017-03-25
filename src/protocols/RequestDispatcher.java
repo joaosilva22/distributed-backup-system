@@ -37,8 +37,11 @@ public class RequestDispatcher extends Thread {
                         case MessageConstants.MessageType.GETCHUNK:
                             new Thread(() -> chunkRestoreSubprotocol.getchunk(message)).start();
                             break;
+                        case MessageConstants.MessageType.CHUNK:
+                            System.out.println("CHHHUUUUUUUUUUUUUUNK");
+                            break;
                         default:
-                            IOUtils.log("RequestDispatcher error: Unknown message type");
+                            IOUtils.err("RequestDispatcher error: Unknown message type");
                             break;
                     }
                 }

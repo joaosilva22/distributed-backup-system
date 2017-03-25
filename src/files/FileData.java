@@ -1,11 +1,19 @@
 package files;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class FileData {
+public class FileData implements Serializable {
+    private FileMetadata metadata;
     private HashMap<Integer, ChunkData> chunks;
 
     public FileData() {
+        metadata = null;
+        chunks = new HashMap<>();
+    }
+
+    public FileData(FileMetadata metadata) {
+        this.metadata = metadata;
         chunks = new HashMap<>();
     }
 

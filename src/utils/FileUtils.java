@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -65,14 +66,14 @@ public class FileUtils {
         int numRead = 0, read = 0;
         try {
             InputStream stream = new FileInputStream(filepath);
-            byte[] chunk = new byte[size];
-            while ((read = stream.read(chunk)) != -1) {
+            byte[] temp = new byte[size];
+            while ((read = stream.read(temp)) != -1) {
+                byte[] chunk = Arrays.copyOfRange(temp, 0, read);
                 chunks.add(chunk);
                 numRead += read;
-                chunk = new byte[size];
             }
             if (numRead % size == 0) {
-                chunk = new byte[size];
+                byte[] chunk = new byte[0];
                 chunks.add(chunk);
             }
         } catch (FileNotFoundException e) {
@@ -90,7 +91,9 @@ public class FileUtils {
         file.createNewFile();
 
         FileOutputStream out = new FileOutputStream(file, false);
-        out.write(data);
+        if (data != null) {
+            out.write(data);
+        }
         out.close();
     }
 
