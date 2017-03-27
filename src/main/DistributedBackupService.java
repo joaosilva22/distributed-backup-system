@@ -7,6 +7,7 @@ import communications.ChannelMonitorThread;
 import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
+import protocols.FileDeletionSubprotocol;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
@@ -36,6 +37,7 @@ public class DistributedBackupService {
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
     private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
+    private FileDeletionSubprotocol fileDeletionSubprotocol;
 
     public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) throws IOException, ClassNotFoundException {
         this.serverId = serverId;
@@ -52,6 +54,7 @@ public class DistributedBackupService {
             FileInputStream fileIn = new FileInputStream(f);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             fileManager = (FileManager) in.readObject();
+            fileManager.init();
             in.close();
             fileIn.close();
         } else {
@@ -59,6 +62,7 @@ public class DistributedBackupService {
         }
         chunkBackupSubprotocol = new ChunkBackupSubprotocol(this);
         chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
+        fileDeletionSubprotocol = new FileDeletionSubprotocol(this);
     }
 
     public void init() {
@@ -135,6 +139,10 @@ public class DistributedBackupService {
 
     public ChunkRestoreSubprotocol getChunkRestoreSubprotocol() {
         return chunkRestoreSubprotocol;
+    }
+
+    public FileDeletionSubprotocol getFileDeletionSubprotocol() {
+        return fileDeletionSubprotocol;
     }
         
     public static void main(String[] args) {

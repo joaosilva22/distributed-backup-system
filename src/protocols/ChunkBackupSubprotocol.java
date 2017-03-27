@@ -105,7 +105,6 @@ public class ChunkBackupSubprotocol {
                 }
             }
         }
-
         if (done) {
             IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
         }

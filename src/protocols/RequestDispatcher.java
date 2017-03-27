@@ -13,12 +13,14 @@ public class RequestDispatcher extends Thread {
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
     private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
+    private FileDeletionSubprotocol fileDeletionSubprotocol;
 
     public RequestDispatcher(DistributedBackupService service) {
         queue = service.getQueue();
         fileManager = service.getFileManager();
         chunkBackupSubprotocol = service.getChunkBackupSubprotocol();
         chunkRestoreSubprotocol = service.getChunkRestoreSubprotocol();
+        fileDeletionSubprotocol = service.getFileDeletionSubprotocol();
     }
 
     public void run() {
@@ -38,7 +40,10 @@ public class RequestDispatcher extends Thread {
                             new Thread(() -> chunkRestoreSubprotocol.getchunk(message)).start();
                             break;
                         case MessageConstants.MessageType.CHUNK:
-                            System.out.println("CHHHUUUUUUUUUUUUUUNK");
+                            new Thread(() -> chunkRestoreSubprotocol.chunk(message)).start();
+                            break;
+                        case MessageConstants.MessageType.DELETE:
+                            new Thread(() -> fileDeletionSubprotocol.delete(message)).start();
                             break;
                         default:
                             IOUtils.err("RequestDispatcher error: Unknown message type");

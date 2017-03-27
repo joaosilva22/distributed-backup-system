@@ -17,6 +17,14 @@ public class FileData implements Serializable {
         chunks = new HashMap<>();
     }
 
+    public HashMap<Integer, ChunkData> getChunks() {
+        return chunks;
+    }
+
+    public FileMetadata getMetadata() {
+        return metadata;
+    }
+
     public ChunkData getChunk(Integer chunkNo) {
         return chunks.get(chunkNo);
     }

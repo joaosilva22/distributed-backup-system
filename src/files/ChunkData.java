@@ -3,20 +3,19 @@ package files;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ChunkData implements Serializable {
     private ArrayList<Integer> replicationDeg;
     private int desiredReplicationDeg;
-    private AtomicBoolean expected;
-    private ArrayList<Byte> data;
+    private byte[] data;
     private int size;
+
+    public ChunkData() {}
 
     public ChunkData(int desiredReplicationDeg) {
         replicationDeg = new ArrayList<>();
         this.desiredReplicationDeg = desiredReplicationDeg;
-        expected = new AtomicBoolean(false);
-        data = new ArrayList<>();
+        data = null;
         size = 0;
     }
 
@@ -24,6 +23,8 @@ public class ChunkData implements Serializable {
         replicationDeg = new ArrayList<>();
         this.replicationDeg.add(serverId);
         this.desiredReplicationDeg = desiredReplicationDeg;
+        data = null;
+        size = 0;
     }
 
     public int getReplicationDeg() {
@@ -38,5 +39,21 @@ public class ChunkData implements Serializable {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setData(byte[] data) {
+        if (data == null) {
+            this.data = new byte[0];
+            return;
+        }
+        this.data = data;
+    }
+
+    public byte[] getData() {
+        return data;
     }
 }

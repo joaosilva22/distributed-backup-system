@@ -22,6 +22,9 @@ public class RMITest {
                 case "GETCHUNK":
                     backup.restoreFile(filepath);
                     break;
+                case "DELETE":
+                    backup.deleteFile(filepath);
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();

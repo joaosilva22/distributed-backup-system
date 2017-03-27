@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.DirectoryNotEmptyException;
 
 public class FileUtils {
     private FileUtils() {}
@@ -89,7 +91,6 @@ public class FileUtils {
     public static void createFile(String filepath, byte[] data) throws IOException, FileNotFoundException {
         File file = new File(filepath);
         file.createNewFile();
-
         FileOutputStream out = new FileOutputStream(file, false);
         if (data != null) {
             out.write(data);
@@ -99,5 +100,15 @@ public class FileUtils {
 
     public static byte[] readFile(String filepath) throws IOException {
         return Files.readAllBytes(Paths.get(filepath));
+    }
+
+    public static void writeToFile(String filepath, byte[] data) throws IOException {
+        FileOutputStream out = new FileOutputStream(filepath, true);
+        out.write(data);
+        out.close();
+    }
+
+    public static void deleteFile(String filepath) throws NoSuchFileException, DirectoryNotEmptyException, IOException {
+        Files.delete(Paths.get(filepath));
     }
 }

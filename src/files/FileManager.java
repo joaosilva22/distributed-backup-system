@@ -12,20 +12,35 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Vector;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.DirectoryNotEmptyException;
 
 public class FileManager implements Serializable {
     private HashMap<String, FileData> files;
-    private Vector<Tuple<String, Integer>> expectedChunks;
 
     // TODO: Isto devia ser uma constante
-    private int storageSpace = 63000;
+    private int storageSpace = 64000;
     private int usedSpace = 0;
     
     public FileManager() {
         new File(FileManagerConstants.PATH).mkdir();
         files = new HashMap<>();
-        expectedChunks = new Vector<>();
+    }
+
+    public void init() {
+        for (String fileId : files.keySet()) {
+            if (files.get(fileId).getMetadata() == null) {
+                for (int chunkNo : files.get(fileId).getChunks().keySet()) {
+                    String filename = getChunkFileName(fileId, chunkNo);
+                    File f = new File(FileManagerConstants.PATH + filename);
+                    if (!f.exists()) {
+                        usedSpace -= files.get(fileId).getChunks().get(chunkNo).getSize();
+                        files.get(fileId).getChunks().remove(chunkNo);
+                        IOUtils.warn("FileManager warning: Lost chunk data <" + fileId + ", " + chunkNo + ">");
+                    }
+                }
+            }
+        }
     }
 
     public FileData getFile(String fileId) {
@@ -36,7 +51,7 @@ public class FileManager implements Serializable {
         FileData file = getFile(fileId);
         if (file == null) {
             try {
-                files.put(fileId, new FileData(new FileMetadata(filepath)));
+                files.put(fileId, new FileData(new FileMetadata(filepath, fileId)));
             } catch (IOException e) {
                 IOUtils.err("FileManager error: " + e.toString());
                 e.printStackTrace();
@@ -62,12 +77,8 @@ public class FileManager implements Serializable {
             files.put(fileId, new FileData());
             file = getFile(fileId);
         }
-
         ChunkData chunk = file.getChunk(chunkNo);
         if (chunk == null) {
-            // TODO: Criar um novo ficheiro para guardar o chunk
-            //       (tipo fileManager.saveChunk(data) ou assim)
-            //       e guardar os metadados desse chunk no hashmap
             String filepath = FileManagerConstants.PATH + getChunkFileName(fileId, chunkNo);
             FileUtils.createFile(filepath, data);
             file.newChunk(chunkNo, serverId, replicationDeg);
@@ -75,6 +86,18 @@ public class FileManager implements Serializable {
                 file.getChunk(chunkNo).setSize(data.length);
                 usedSpace += data.length;
             }
+        }
+    }
+
+    public void recoverChunk(String fileId, int chunkNo, byte[] data) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            ChunkData chunk = file.getChunk(chunkNo);
+            if (chunk == null) {
+                chunk = new ChunkData();
+                file.getChunks().put(chunkNo, chunk);
+            }
+            chunk.setData(data);
         }
     }
 
@@ -98,13 +121,12 @@ public class FileManager implements Serializable {
         if (chunk == null) {
             return null;
         }
-
         byte[] data;
         String path = FileManagerConstants.PATH + getChunkFileName(fileId, chunkNo);
         try {
             data = FileUtils.readFile(path);
         } catch (IOException e) {
-            IOUtils.err("FileManager err: " + e.toString());
+            IOUtils.err("FileManager error: " + e.toString());
             e.printStackTrace();
             return null;
         }
@@ -113,14 +135,6 @@ public class FileManager implements Serializable {
 
     private String getChunkFileName(String fileId, int chunkNo) {
         return fileId + "_" + chunkNo;
-    }
-
-    public void expectChunk(String fileId, int chunkNo) {
-        expectedChunks.add(new Tuple<>(fileId, chunkNo));
-    }
-
-    public boolean isExpectingChunk(String fileId, int chunkNo) {
-        return expectedChunks.contains(new Tuple<>(fileId, chunkNo));
     }
 
     public int getAvailableSpace() {
@@ -133,7 +147,39 @@ public class FileManager implements Serializable {
         out.writeObject(this);
         out.close();
         fileOut.close();
-
         IOUtils.log("Saving file metadata...");
+    }
+
+    public FileMetadata getFileMetadata(String filepath) {
+        for (FileData data : files.values()) {
+            if (data.getMetadata().getFilepath().equals(filepath)) {
+                return data.getMetadata();
+            }
+        }
+        return null;
+    }
+
+    public void deleteChunkFile(String fileId, int chunkNo) {
+        String filepath = FileManagerConstants.PATH + getChunkFileName(fileId, chunkNo);
+        try {
+            FileUtils.deleteFile(filepath);
+        } catch (NoSuchFileException e) {
+            IOUtils.err("FileManager error: " + e.toString());
+            e.printStackTrace();
+        } catch (DirectoryNotEmptyException e) {
+            IOUtils.err("FileManager error: " + e.toString());
+            e.printStackTrace();
+        } catch (IOException e) {
+            IOUtils.err("FileManager error: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteFile(String fileId) {
+        files.remove(fileId);
+    }
+
+    public void addUsedSpace(int diff) {
+        usedSpace += diff;
     }
 }

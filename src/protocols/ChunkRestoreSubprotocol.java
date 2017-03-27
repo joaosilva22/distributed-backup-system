@@ -2,6 +2,7 @@ package protocols;
 
 import main.DistributedBackupService;
 import utils.IOUtils;
+import utils.Tuple;
 import communications.MessageHeader;
 import communications.MessageBody;
 import communications.Message;
@@ -14,12 +15,17 @@ import java.net.DatagramPacket;
 import java.net.UnknownHostException;
 import java.net.SocketException;
 import java.io.IOException;
+import java.util.Vector;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ChunkRestoreSubprotocol {
     private FileManager fileManager;
     private String mdrAddr, mcAddr;
     private int mdrPort, mcPort;
     private int serverId;
+
+    private Vector<Tuple<String, Integer>> incoming;
+    private Vector<Tuple<String, Integer>> outgoing;
     
     public ChunkRestoreSubprotocol(DistributedBackupService service) {
         serverId = service.getServerId();
@@ -28,6 +34,8 @@ public class ChunkRestoreSubprotocol {
         mdrPort = service.getMdrPort();
         mcAddr = service.getMcAddr();
         mcPort = service.getMcPort();
+        incoming = new Vector<>();
+        outgoing = new Vector<>();
     }
 
     public void initGetchunk(float version, int senderId, String fileId, int chunkNo) {
@@ -60,7 +68,16 @@ public class ChunkRestoreSubprotocol {
             e.printStackTrace();
         }
 
-        fileManager.expectChunk(fileId, chunkNo);
+        if (!incoming.contains(new Tuple<>(fileId, chunkNo))) {
+            incoming.add(new Tuple<>(fileId, chunkNo));
+        }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkRestoreSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
     }
 
     public void getchunk(Message request) {
@@ -91,6 +108,19 @@ public class ChunkRestoreSubprotocol {
                     .addHeader(header)
                     .setBody(body);
 
+                outgoing.add(new Tuple<>(fileId, chunkNo));
+                // TODO: Subsituir isto por uma constante
+                int delay = ThreadLocalRandom.current().nextInt(0, 401);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                }
+                if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                    return;
+                }
+
                 try {
                     // TODO: Estou a criar uma socket de cada vez que inicio um
                     //       putchunk... Se calhar era melhor receber a socket
@@ -112,6 +142,13 @@ public class ChunkRestoreSubprotocol {
                 }
             }
         }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkRestoreSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
     }
 
     public void chunk(Message request) {
@@ -124,10 +161,18 @@ public class ChunkRestoreSubprotocol {
         
         IOUtils.log("Received CHUNK <" + fileId + ", " + chunkNo + ">");
 
-        // TODO: Se este servidor estiver à espera de um chunk, e se o chunk
-        //       que está à espera corresponder com um dos que foi enviado
-        //       então guardar o chunk
-        if (fileManager.isExpectingChunk(fileId, chunkNo)) {
+        if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+            outgoing.remove(new Tuple<>(fileId, chunkNo));
+        }
+        if (incoming.contains(new Tuple<>(fileId, chunkNo))) {
+            fileManager.recoverChunk(fileId, chunkNo, data);
+        }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkRestoreSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
         }
     }
 }

@@ -11,6 +11,7 @@ public class MessageConstants {
         public static final String STORED = "STORED";
         public static final String GETCHUNK = "GETCHUNK";
         public static final String CHUNK = "CHUNK";
+        public static final String DELETE = "DELETE";
         // TODO: Adicionar o resto dos message types
         // ...
     }
