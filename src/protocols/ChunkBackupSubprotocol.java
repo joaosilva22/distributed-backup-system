@@ -41,8 +41,6 @@ public class ChunkBackupSubprotocol {
         // TODO: Substituir este magic number por uma constante
         int delay = 1000;
 
-        fileManager.registerChunk(senderId, fileId, chunkNo, replicationDeg);
-
         // TODO: Substituir este magic number por uma constante
         while (!done && iteration < 5) {
             MessageHeader header = new MessageHeader()
@@ -80,9 +78,6 @@ public class ChunkBackupSubprotocol {
                 e.printStackTrace();
             }
 
-            // TODO: Esperar um segundo antes de verificar o replication
-            //       degree junto do file manager
-            //       ...
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException e) {
@@ -110,9 +105,15 @@ public class ChunkBackupSubprotocol {
                 }
             }
         }
-
         if (done) {
             IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+        }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -120,18 +121,23 @@ public class ChunkBackupSubprotocol {
         // TODO: O version da mensagem nao esta a ser utilizado para nada
         //       para ja...
         MessageHeader requestHeader = request.getHeaders().get(0);
-               
         String fileId = requestHeader.getFileId();
         float version = requestHeader.getVersion();
         int senderId = requestHeader.getSenderId();
         int chunkNo = requestHeader.getChunkNo();
         int replicationDeg = requestHeader.getReplicationDeg();
-        
         byte[] data = request.getBody().getBytes();
 
         IOUtils.log("Received PUTCHUNK <" + fileId + ", " + chunkNo + ">");
 
         if (senderId != serverId) {
+            if (data != null) {
+                if (fileManager.getAvailableSpace() < data.length) {
+                    IOUtils.warn("ChunkBackupSubprotocol warning: Not enough space <" + fileId + ", " + chunkNo + ">");
+                    return;
+                }
+            }
+            
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
             } catch (IOException e) {
@@ -176,6 +182,12 @@ public class ChunkBackupSubprotocol {
                 e.printStackTrace();
             }
         }
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
     }
 
     public void stored(Message request) {
@@ -191,5 +203,11 @@ public class ChunkBackupSubprotocol {
         IOUtils.log("Received STORED <" + fileId + ", " + chunkNo + ">");
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
     }
 }

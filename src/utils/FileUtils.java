@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.DirectoryNotEmptyException;
 
 public class FileUtils {
     private FileUtils() {}
@@ -65,14 +68,14 @@ public class FileUtils {
         int numRead = 0, read = 0;
         try {
             InputStream stream = new FileInputStream(filepath);
-            byte[] chunk = new byte[size];
-            while ((read = stream.read(chunk)) != -1) {
+            byte[] temp = new byte[size];
+            while ((read = stream.read(temp)) != -1) {
+                byte[] chunk = Arrays.copyOfRange(temp, 0, read);
                 chunks.add(chunk);
                 numRead += read;
-                chunk = new byte[size];
             }
             if (numRead % size == 0) {
-                chunk = new byte[size];
+                byte[] chunk = new byte[0];
                 chunks.add(chunk);
             }
         } catch (FileNotFoundException e) {
@@ -88,13 +91,24 @@ public class FileUtils {
     public static void createFile(String filepath, byte[] data) throws IOException, FileNotFoundException {
         File file = new File(filepath);
         file.createNewFile();
-
         FileOutputStream out = new FileOutputStream(file, false);
-        out.write(data);
+        if (data != null) {
+            out.write(data);
+        }
         out.close();
     }
 
     public static byte[] readFile(String filepath) throws IOException {
         return Files.readAllBytes(Paths.get(filepath));
+    }
+
+    public static void writeToFile(String filepath, byte[] data) throws IOException {
+        FileOutputStream out = new FileOutputStream(filepath, true);
+        out.write(data);
+        out.close();
+    }
+
+    public static void deleteFile(String filepath) throws NoSuchFileException, DirectoryNotEmptyException, IOException {
+        Files.delete(Paths.get(filepath));
     }
 }

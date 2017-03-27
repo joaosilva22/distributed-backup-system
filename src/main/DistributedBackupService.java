@@ -7,13 +7,18 @@ import communications.ChannelMonitorThread;
 import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
+import protocols.FileDeletionSubprotocol;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
+import files.FileManagerConstants;
 import utils.IOUtils;
 
 import java.net.UnknownHostException;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -32,8 +37,9 @@ public class DistributedBackupService {
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
     private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
+    private FileDeletionSubprotocol fileDeletionSubprotocol;
 
-    public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) {
+    public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) throws IOException, ClassNotFoundException {
         this.serverId = serverId;
         this.mcAddr = mcAddr;
         this.mcPort = mcPort;
@@ -43,9 +49,20 @@ public class DistributedBackupService {
         this.mdrPort = mdrPort;
         
         queue = new ConcurrentLinkedQueue<>();
-        fileManager = new FileManager();
+        File f = new File(FileManagerConstants.PATH + FileManagerConstants.METADATA_FILENAME + serverId);
+        if (f.exists()) {
+            FileInputStream fileIn = new FileInputStream(f);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            fileManager = (FileManager) in.readObject();
+            fileManager.init();
+            in.close();
+            fileIn.close();
+        } else {
+            fileManager = new FileManager();
+        }
         chunkBackupSubprotocol = new ChunkBackupSubprotocol(this);
         chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
+        fileDeletionSubprotocol = new FileDeletionSubprotocol(this);
     }
 
     public void init() {
@@ -123,6 +140,10 @@ public class DistributedBackupService {
     public ChunkRestoreSubprotocol getChunkRestoreSubprotocol() {
         return chunkRestoreSubprotocol;
     }
+
+    public FileDeletionSubprotocol getFileDeletionSubprotocol() {
+        return fileDeletionSubprotocol;
+    }
         
     public static void main(String[] args) {
         if (args.length != 7) {
@@ -131,8 +152,19 @@ public class DistributedBackupService {
         }
 
         // TODO: Handling dos erros de parsing
-        DistributedBackupService service = new DistributedBackupService(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
-        service.init();
+        DistributedBackupService service = null;
+        try {
+            service = new DistributedBackupService(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
+            service.init();
+        } catch (IOException e) {
+            IOUtils.err("DistributedBackupService error: " + e.toString());
+            e.printStackTrace();
+            return;
+        } catch (ClassNotFoundException e) {
+            IOUtils.err("DistributedBackupService error: " + e.toString());
+            e.printStackTrace();
+            return;
+        }
 
         IOUtils.log("Starting server (id=" + service.serverId + ") with params:");
         IOUtils.log("Multicast Control Channel: <" + service.mcAddr + ", " + service.mcPort + ">");
