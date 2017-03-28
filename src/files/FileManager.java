@@ -29,13 +29,13 @@ public class FileManager implements Serializable {
 
     public void init() {
         for (String fileId : files.keySet()) {
-            if (files.get(fileId).getMetadata() == null) {
-                for (int chunkNo : files.get(fileId).getChunks().keySet()) {
+            if (getFileMetadataByFileId(fileId) == null) {
+                for (int chunkNo : getFileChunks(fileId).keySet()) {
                     String filename = getChunkFileName(fileId, chunkNo);
                     File f = new File(FileManagerConstants.PATH + filename);
                     if (!f.exists()) {
-                        usedSpace -= files.get(fileId).getChunks().get(chunkNo).getSize();
-                        files.get(fileId).getChunks().remove(chunkNo);
+                        usedSpace -= getChunk(fileId, chunkNo).getSize();
+                        getFileChunks(fileId).remove(chunkNo);
                         IOUtils.warn("FileManager warning: Lost chunk data <" + fileId + ", " + chunkNo + ">");
                     }
                 }
@@ -214,6 +214,22 @@ public class FileManager implements Serializable {
         FileData file = files.get(fileId);
         if (file != null) {
             return file.getChunks().get(chunkNo);
+        }
+        return null;
+    }
+
+    public FileMetadata getFileMetadataByFileId(String fileId) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            return file.getMetadata();
+        } 
+        return null;
+    }
+
+    public HashMap<Integer, ChunkData> getFileChunks(String fileId) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            return file.getChunks();
         }
         return null;
     }

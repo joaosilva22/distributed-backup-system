@@ -3,9 +3,9 @@ package protocols;
 import main.DistributedBackupService;
 import utils.IOUtils;
 import utils.Tuple;
-import communications.MessageHeader;
-import communications.MessageBody;
 import communications.Message;
+import communications.MessageBody;
+import communications.MessageHeader;
 import communications.MessageConstants;
 import files.FileManager;
 
@@ -156,8 +156,8 @@ public class ChunkRestoreSubprotocol {
     public void chunk(Message request) {
         MessageHeader requestHeader = request.getHeaders().get(0);
         String fileId = requestHeader.getFileId();
-        float version = requestHeader.getVersion();
-        int senderId = requestHeader.getSenderId();
+        // TODO: Version não está a ser usado
+        // float version = requestHeader.getVersion();
         int chunkNo = requestHeader.getChunkNo();
         byte[] data = request.getBody().getBytes();
         
