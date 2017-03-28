@@ -34,6 +34,7 @@ public class ChunkRestoreSubprotocol {
         mdrPort = service.getMdrPort();
         mcAddr = service.getMcAddr();
         mcPort = service.getMcPort();
+        
         incoming = new Vector<>();
         outgoing = new Vector<>();
     }
@@ -120,6 +121,7 @@ public class ChunkRestoreSubprotocol {
                 if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
                     return;
                 }
+                outgoing.remove(new Tuple<>(fileId, chunkNo));
 
                 try {
                     // TODO: Estou a criar uma socket de cada vez que inicio um
@@ -166,6 +168,7 @@ public class ChunkRestoreSubprotocol {
         }
         if (incoming.contains(new Tuple<>(fileId, chunkNo))) {
             fileManager.recoverChunk(fileId, chunkNo, data);
+            incoming.remove(new Tuple<>(fileId, chunkNo));
         }
 
         try {

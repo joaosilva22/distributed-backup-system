@@ -27,14 +27,24 @@ public class ChunkData implements Serializable {
         size = 0;
     }
 
-    public int getReplicationDeg() {
-        return replicationDeg.size();
-    }
-
-    public void incrementReplicationDeg(int serverId) {
+    public void incrementReplicationDegree(int serverId) {
         if (!replicationDeg.contains(serverId)) {
             replicationDeg.add(serverId);
         }
+    }
+
+    public void decreaseReplicationDegree(int serverId) {
+        if (replicationDeg.contains(serverId)) {
+            replicationDeg.remove(new Integer(serverId));
+        }
+    }
+
+    public int getReplicationDegree() {
+        return replicationDeg.size();
+    }
+
+    public int getDesiredReplicationDegree() {
+        return desiredReplicationDeg;
     }
 
     public void setSize(int size) {
