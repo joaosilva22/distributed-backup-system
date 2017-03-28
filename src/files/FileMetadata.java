@@ -35,4 +35,12 @@ public class FileMetadata implements Serializable {
     public String getFileId() {
         return fileId;
     }
+
+    public String getSize() {
+        return fileId;
+    }
+
+    public FileTime getLastModifiedTime() {
+        return FileTime.fromMillis(lastModifiedTime);
+    }
 }

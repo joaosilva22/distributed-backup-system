@@ -92,6 +92,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
                     byte[] data = fileManager.getFile(fileId).getChunk(i).getData();
                     FileUtils.writeToFile(filepath, data);
                 }
+                FileUtils.setFileMetadata(filepath, metadata);
                 IOUtils.log("Recovered file " + filepath);
             } catch (IOException e) {
                 IOUtils.err("BackupService error: " + e.toString());
