@@ -2,17 +2,16 @@ package protocols;
 
 import main.DistributedBackupService;
 import utils.IOUtils;
-import communications.MessageHeader;
 import communications.Message;
+import communications.MessageHeader;
 import communications.MessageConstants;
 import files.FileManager;
-import files.FileData;
 
 import java.net.InetAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
-import java.net.UnknownHostException;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.io.IOException;
 
 public class FileDeletionSubprotocol {
@@ -74,14 +73,11 @@ public class FileDeletionSubprotocol {
 
         IOUtils.log("Received DELETE <" + fileId + ">");
 
-        FileData file = fileManager.getFile(fileId);
-        if (file != null && file.getMetadata() == null) {
-            for (int chunkNo : file.getChunks().keySet()) {
-                System.out.println("AVAILABLE SPACE=" + fileManager.getAvailableSpace());
+        if (fileManager.getFile(fileId) != null) {
+            for (int chunkNo : fileManager.getFileChunks(fileId).keySet()) {
                 IOUtils.log("Deleted file " + fileId);
                 fileManager.deleteChunkFile(fileId, chunkNo);
-                fileManager.addUsedSpace(file.getChunk(chunkNo).getSize() * -1);
-                System.out.println("AVAILABLE SPACE=" + fileManager.getAvailableSpace());
+                fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
             }
             fileManager.deleteFile(fileId);
         }

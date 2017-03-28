@@ -1,5 +1,7 @@
 package utils;
 
+import files.FileMetadata;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,9 +16,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 
 public class FileUtils {
     private FileUtils() {}
@@ -110,5 +113,10 @@ public class FileUtils {
 
     public static void deleteFile(String filepath) throws NoSuchFileException, DirectoryNotEmptyException, IOException {
         Files.delete(Paths.get(filepath));
+    }
+
+    public static void setFileMetadata(String filepath, FileMetadata metadata) throws IOException {
+        FileTime lastModifiedTime = metadata.getLastModifiedTime();
+        Files.setLastModifiedTime(Paths.get(filepath), lastModifiedTime);
     }
 }

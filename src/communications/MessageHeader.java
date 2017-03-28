@@ -1,5 +1,7 @@
 package communications;
 
+import utils.IOUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -46,9 +48,15 @@ public class MessageHeader {
                 senderId = Integer.parseInt(fields.get(2));
                 fileId = fields.get(3);
                 break;
-            // TODO: Fazer parse do resto das mensagens
-            //       Fazer throw de exception quando a mesage type nao
-            //       for algum dos tipos conhecidos
+            case MessageConstants.MessageType.REMOVED:
+                version = Float.parseFloat(fields.get(1));
+                senderId = Integer.parseInt(fields.get(2));
+                fileId = fields.get(3);
+                chunkNo = Integer.parseInt(fields.get(4));
+                break;
+            default:
+                IOUtils.err("MessageHeader error: Unrecognized message type");
+                break;
         }
     }
 

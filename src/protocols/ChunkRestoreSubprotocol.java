@@ -3,9 +3,9 @@ package protocols;
 import main.DistributedBackupService;
 import utils.IOUtils;
 import utils.Tuple;
-import communications.MessageHeader;
-import communications.MessageBody;
 import communications.Message;
+import communications.MessageBody;
+import communications.MessageHeader;
 import communications.MessageConstants;
 import files.FileManager;
 
@@ -34,6 +34,7 @@ public class ChunkRestoreSubprotocol {
         mdrPort = service.getMdrPort();
         mcAddr = service.getMcAddr();
         mcPort = service.getMcPort();
+        
         incoming = new Vector<>();
         outgoing = new Vector<>();
     }
@@ -120,6 +121,7 @@ public class ChunkRestoreSubprotocol {
                 if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
                     return;
                 }
+                outgoing.remove(new Tuple<>(fileId, chunkNo));
 
                 try {
                     // TODO: Estou a criar uma socket de cada vez que inicio um
@@ -154,8 +156,8 @@ public class ChunkRestoreSubprotocol {
     public void chunk(Message request) {
         MessageHeader requestHeader = request.getHeaders().get(0);
         String fileId = requestHeader.getFileId();
-        float version = requestHeader.getVersion();
-        int senderId = requestHeader.getSenderId();
+        // TODO: Version não está a ser usado
+        // float version = requestHeader.getVersion();
         int chunkNo = requestHeader.getChunkNo();
         byte[] data = request.getBody().getBytes();
         
@@ -166,6 +168,7 @@ public class ChunkRestoreSubprotocol {
         }
         if (incoming.contains(new Tuple<>(fileId, chunkNo))) {
             fileManager.recoverChunk(fileId, chunkNo, data);
+            incoming.remove(new Tuple<>(fileId, chunkNo));
         }
 
         try {

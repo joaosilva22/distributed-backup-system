@@ -29,13 +29,13 @@ public class FileManager implements Serializable {
 
     public void init() {
         for (String fileId : files.keySet()) {
-            if (files.get(fileId).getMetadata() == null) {
-                for (int chunkNo : files.get(fileId).getChunks().keySet()) {
+            if (getFileMetadataByFileId(fileId) == null) {
+                for (int chunkNo : getFileChunks(fileId).keySet()) {
                     String filename = getChunkFileName(fileId, chunkNo);
                     File f = new File(FileManagerConstants.PATH + filename);
                     if (!f.exists()) {
-                        usedSpace -= files.get(fileId).getChunks().get(chunkNo).getSize();
-                        files.get(fileId).getChunks().remove(chunkNo);
+                        usedSpace -= getChunk(fileId, chunkNo).getSize();
+                        getFileChunks(fileId).remove(chunkNo);
                         IOUtils.warn("FileManager warning: Lost chunk data <" + fileId + ", " + chunkNo + ">");
                     }
                 }
@@ -108,8 +108,35 @@ public class FileManager implements Serializable {
         }
         ChunkData chunk = file.getChunk(chunkNo);
         if (chunk != null) {
-            chunk.incrementReplicationDeg(serverId);
+            chunk.incrementReplicationDegree(serverId);
         }
+    }
+
+    public void decreaseReplicationDegree(int serverId, String fileId, int chunkNo) {
+        FileData file = getFile(fileId);
+        if (file == null) {
+            return;
+        }
+        ChunkData chunk = file.getChunk(chunkNo);
+        if (chunk != null) {
+            chunk.decreaseReplicationDegree(serverId);
+        }
+    }
+
+    public int getChunkReplicationDegree(String fileId, int chunkNo) {
+        ChunkData chunk = getChunk(fileId, chunkNo);
+        if (chunk != null) {
+            return chunk.getReplicationDegree();
+        }
+        return -1;
+    }
+
+    public int getChunkDesiredReplicationDegree(String fileId, int chunkNo) {
+        ChunkData chunk = getChunk(fileId, chunkNo);
+        if (chunk != null) {
+            return chunk.getDesiredReplicationDegree();
+        }
+        return -1;
     }
 
     public byte[] retrieveChunkData(String fileId, int chunkNo) {
@@ -181,5 +208,29 @@ public class FileManager implements Serializable {
 
     public void addUsedSpace(int diff) {
         usedSpace += diff;
+    }
+
+    public ChunkData getChunk(String fileId, int chunkNo) {
+        FileData file = files.get(fileId);
+        if (file != null) {
+            return file.getChunks().get(chunkNo);
+        }
+        return null;
+    }
+
+    public FileMetadata getFileMetadataByFileId(String fileId) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            return file.getMetadata();
+        } 
+        return null;
+    }
+
+    public HashMap<Integer, ChunkData> getFileChunks(String fileId) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            return file.getChunks();
+        }
+        return null;
     }
 }

@@ -8,6 +8,7 @@ import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
 import protocols.FileDeletionSubprotocol;
+import protocols.SpaceReclaimingSubprotocol;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
@@ -38,6 +39,7 @@ public class DistributedBackupService {
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
     private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
     private FileDeletionSubprotocol fileDeletionSubprotocol;
+    private SpaceReclaimingSubprotocol spaceReclaimingSubprotocol;
 
     public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) throws IOException, ClassNotFoundException {
         this.serverId = serverId;
@@ -63,6 +65,7 @@ public class DistributedBackupService {
         chunkBackupSubprotocol = new ChunkBackupSubprotocol(this);
         chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
         fileDeletionSubprotocol = new FileDeletionSubprotocol(this);
+        spaceReclaimingSubprotocol = new SpaceReclaimingSubprotocol(this);
     }
 
     public void init() {
@@ -143,6 +146,10 @@ public class DistributedBackupService {
 
     public FileDeletionSubprotocol getFileDeletionSubprotocol() {
         return fileDeletionSubprotocol;
+    }
+
+    public SpaceReclaimingSubprotocol getSpaceReclaimingSubprotocol() {
+        return spaceReclaimingSubprotocol;
     }
         
     public static void main(String[] args) {

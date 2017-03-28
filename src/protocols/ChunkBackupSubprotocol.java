@@ -2,19 +2,17 @@ package protocols;
 
 import main.DistributedBackupService;
 import communications.Message;
-import communications.MessageHeader;
 import communications.MessageBody;
+import communications.MessageHeader;
 import communications.MessageConstants;
 import files.FileManager;
-import files.FileData;
-import files.ChunkData;
 import utils.IOUtils;
 
 import java.net.InetAddress;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
-import java.net.UnknownHostException;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -59,9 +57,6 @@ public class ChunkBackupSubprotocol {
                 .setBody(body);
 
             try {
-                // TODO: Estou a criar uma socket de cada vez que inicio um
-                //       putchunk... Se calhar era melhor receber a socket
-                //       como argumento?
                 InetAddress inetaddress = InetAddress.getByName(mdbAddr);
                 DatagramSocket socket = new DatagramSocket();
                 byte[] buf = message.getBytes();
@@ -84,19 +79,12 @@ public class ChunkBackupSubprotocol {
                 IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
             }
-
-            // TODO: Apagar isto quando descobrir porque e que as vezes
-            //       isto da um NullPointerException
-            FileData file = fileManager.getFile(fileId);
-            if (file == null) { IOUtils.log("File is null"); }
-            ChunkData chunk = file.getChunk(chunkNo);
-            if (chunk == null) { IOUtils.log("Chunk is null"); }
             
-            int currentReplicationDeg = fileManager.getFile(fileId).getChunk(chunkNo).getReplicationDeg();
+            int currentReplicationDeg = fileManager.getChunkReplicationDegree(fileId, chunkNo);
             if (currentReplicationDeg >= replicationDeg) {
                 done = true;
             } else {                
-                iteration++;
+                iteration += 1;
                 delay *= 2;
                 if (iteration < 5) {
                     IOUtils.warn("Failed to hit target replication deg, retrying <" + fileId + ", " + chunkNo + ">");
@@ -112,7 +100,7 @@ public class ChunkBackupSubprotocol {
         try {
             fileManager.save(serverId);
         } catch (IOException e) {
-            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata" + e.toString());
+            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata " + e.toString());
             e.printStackTrace();
         }
     }
@@ -136,8 +124,7 @@ public class ChunkBackupSubprotocol {
                     IOUtils.warn("ChunkBackupSubprotocol warning: Not enough space <" + fileId + ", " + chunkNo + ">");
                     return;
                 }
-            }
-            
+            }            
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
             } catch (IOException e) {
@@ -167,7 +154,6 @@ public class ChunkBackupSubprotocol {
             try {
                 InetAddress inetaddress = InetAddress.getByName(mcAddr);
                 DatagramSocket socket = new DatagramSocket();
-
                 byte[] buf = response.getBytes();
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
                 socket.send(packet);
