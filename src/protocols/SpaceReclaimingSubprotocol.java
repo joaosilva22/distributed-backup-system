@@ -47,12 +47,12 @@ public class SpaceReclaimingSubprotocol {
         if (senderId != serverId) {        
             if (fileManager.getChunk(fileId, chunkNo) != null) {
                 fileManager.decreaseReplicationDegree(senderId, fileId, chunkNo);
-                if (fileManager.getFileMetadata(fileId) != null) {
-                    System.out.println("Am the owner");
+                if (fileManager.getFileMetadataByFileId(fileId) != null) {
                     return;
                 }
                 int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
                 int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
+                System.out.println("Am here" + desiredReplicationDegree + " " +  replicationDegree);
             
                 if (replicationDegree < desiredReplicationDegree) {
                     outgoing.add(new Tuple<>(fileId, chunkNo));
