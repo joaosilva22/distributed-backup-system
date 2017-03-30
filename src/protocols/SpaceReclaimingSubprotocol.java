@@ -16,6 +16,7 @@ import java.net.UnknownHostException;
 import java.net.SocketException;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SpaceReclaimingSubprotocol {
@@ -35,6 +36,89 @@ public class SpaceReclaimingSubprotocol {
         outgoing = new Vector<>();
     }
 
+    public void reclaim(int amount) {
+        fileManager.reclaimStorageSpace(amount);
+        ArrayList<Tuple<String, Integer>> chunksToRemove = fileManager.getChunksWithReplicationDegreeTooDamnHigh();
+        for (Tuple<String, Integer> chunkToRemove : chunksToRemove) {
+            String fileIdToRemove = chunkToRemove.x;
+            int chunkNoToRemove = chunkToRemove.y;
+
+            IOUtils.log("Deleting chunk to reclaim space <" + fileIdToRemove + ", " + chunkNoToRemove + ">");
+            fileManager.deleteChunkFile(fileIdToRemove, chunkNoToRemove);
+            fileManager.addUsedSpace(fileManager.getChunk(fileIdToRemove, chunkNoToRemove).getSize() * -1);
+            fileManager.deleteChunk(fileIdToRemove, chunkNoToRemove);
+
+            MessageHeader removedHeader = new MessageHeader()
+                .setMessageType(MessageConstants.MessageType.REMOVED)
+                .setVersion(1.0f)
+                .setSenderId(serverId)
+                .setFileId(fileIdToRemove)
+                .setChunkNo(chunkNoToRemove);
+
+            Message removed = new Message()
+                .addHeader(removedHeader);
+
+            try {
+                InetAddress inetaddress = InetAddress.getByName(mcAddr);
+                DatagramSocket socket = new DatagramSocket();
+                byte[] buf = removed.getBytes();
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
+                socket.send(packet);
+            } catch (UnknownHostException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (SocketException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (IOException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            }
+
+            if (fileManager.getAvailableSpace() >= 0) {
+                break;
+            }
+        }
+
+        while (fileManager.getAvailableSpace() < 0) {
+            Tuple<String, Integer> chunkToRemove = fileManager.getChunkWithHighestReplicationDegree();
+            String fileIdToRemove = chunkToRemove.x;
+            int chunkNoToRemove = chunkToRemove.y;
+            
+            IOUtils.log("Deleting chunk to reclaim space <" + fileIdToRemove + ", " + chunkNoToRemove + ">");
+            fileManager.deleteChunkFile(fileIdToRemove, chunkNoToRemove);
+            fileManager.addUsedSpace(fileManager.getChunk(fileIdToRemove, chunkNoToRemove).getSize() * -1);
+            fileManager.deleteChunk(fileIdToRemove, chunkNoToRemove);
+
+            MessageHeader removedHeader = new MessageHeader()
+                .setMessageType(MessageConstants.MessageType.REMOVED)
+                .setVersion(1.0f)
+                .setSenderId(serverId)
+                .setFileId(fileIdToRemove)
+                .setChunkNo(chunkNoToRemove);
+
+            Message removed = new Message()
+                .addHeader(removedHeader);
+
+            try {
+                InetAddress inetaddress = InetAddress.getByName(mcAddr);
+                DatagramSocket socket = new DatagramSocket();
+                byte[] buf = removed.getBytes();
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
+                socket.send(packet);
+            } catch (UnknownHostException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (SocketException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (IOException e) {
+                IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void removed(Message request) {
         MessageHeader requestHeader = request.getHeaders().get(0);
         float version = requestHeader.getVersion();
@@ -52,7 +136,6 @@ public class SpaceReclaimingSubprotocol {
                 }
                 int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
                 int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
-                System.out.println("Am here" + desiredReplicationDegree + " " +  replicationDegree);
             
                 if (replicationDegree < desiredReplicationDegree) {
                     outgoing.add(new Tuple<>(fileId, chunkNo));

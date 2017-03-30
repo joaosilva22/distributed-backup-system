@@ -6,6 +6,7 @@ import utils.IOUtils;
 import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
 import protocols.FileDeletionSubprotocol;
+import protocols.SpaceReclaimingSubprotocol;
 import files.FileManager;
 import files.FileMetadata;
 
@@ -20,11 +21,13 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
     private ChunkRestoreSubprotocol chunkRestoreSubprotocol;
     private FileDeletionSubprotocol fileDeletionSubprotocol;
+    private SpaceReclaimingSubprotocol spaceReclaimingSubprotocol;
     
     public BackupService(DistributedBackupService service) throws RemoteException {
         chunkBackupSubprotocol = service.getChunkBackupSubprotocol();
         chunkRestoreSubprotocol = service.getChunkRestoreSubprotocol();
         fileDeletionSubprotocol = service.getFileDeletionSubprotocol();
+        spaceReclaimingSubprotocol = service.getSpaceReclaimingSubprotocol();
         serverId = service.getServerId();
         fileManager = service.getFileManager();
     }
@@ -106,6 +109,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         new Thread(() -> fileDeletionSubprotocol.initDelete(1.0f, serverId, fileId)).start();
     }
 
-    // TODO: Adicionar os metodos relativos aos restantes protocolos
-    //       ...
+    public void reclaimSpace(int amount) {
+        new Thread(() -> spaceReclaimingSubprotocol.reclaim(amount)).start();
+    }
 }

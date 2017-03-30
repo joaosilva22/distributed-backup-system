@@ -257,4 +257,22 @@ public class FileManager implements Serializable {
         }
         return chunks;
     }
+
+    public void reclaimStorageSpace(int amount) {
+        storageSpace -= amount;
+    }
+
+    public Tuple<String, Integer> getChunkWithHighestReplicationDegree() {
+        Tuple<String, Integer> chunk = new Tuple<>("", 0);
+        int max = 0;
+        for (String fileId : files.keySet()) {
+            for (int chunkNo : getFileChunks(fileId).keySet()) {
+                int replicationDegree = getChunkReplicationDegree(fileId, chunkNo);
+                if (replicationDegree > max) {
+                    chunk = new Tuple<>(fileId, chunkNo);
+                }
+            }
+        }
+        return chunk;
+    }
 }
