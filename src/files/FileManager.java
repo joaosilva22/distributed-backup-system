@@ -11,15 +11,14 @@ import java.io.Serializable;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.DirectoryNotEmptyException;
 
 public class FileManager implements Serializable {
     private HashMap<String, FileData> files;
-
-    // TODO: Isto devia ser uma constante
-    private int storageSpace = 64000;
+    private int storageSpace = FileManagerConstants.MAX_DISK_SPACE;
     private int usedSpace = 0;
     
     public FileManager() {
@@ -41,10 +40,6 @@ public class FileManager implements Serializable {
                 }
             }
         }
-    }
-
-    public FileData getFile(String fileId) {
-        return files.get(fileId);
     }
 
     public void registerFile(String filepath, String fileId) {
@@ -123,22 +118,6 @@ public class FileManager implements Serializable {
         }
     }
 
-    public int getChunkReplicationDegree(String fileId, int chunkNo) {
-        ChunkData chunk = getChunk(fileId, chunkNo);
-        if (chunk != null) {
-            return chunk.getReplicationDegree();
-        }
-        return -1;
-    }
-
-    public int getChunkDesiredReplicationDegree(String fileId, int chunkNo) {
-        ChunkData chunk = getChunk(fileId, chunkNo);
-        if (chunk != null) {
-            return chunk.getDesiredReplicationDegree();
-        }
-        return -1;
-    }
-
     public byte[] retrieveChunkData(String fileId, int chunkNo) {
         FileData file = getFile(fileId);
         if (file == null) {
@@ -158,32 +137,6 @@ public class FileManager implements Serializable {
             return null;
         }
         return data;
-    }
-
-    private String getChunkFileName(String fileId, int chunkNo) {
-        return fileId + "_" + chunkNo;
-    }
-
-    public int getAvailableSpace() {
-        return storageSpace - usedSpace;
-    }
-
-    public void save(int serverId) throws IOException {
-        FileOutputStream fileOut = new FileOutputStream(FileManagerConstants.PATH + FileManagerConstants.METADATA_FILENAME + serverId);
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(this);
-        out.close();
-        fileOut.close();
-        IOUtils.log("Saving file metadata...");
-    }
-
-    public FileMetadata getFileMetadata(String filepath) {
-        for (FileData data : files.values()) {
-            if (data.getMetadata().getFilepath().equals(filepath)) {
-                return data.getMetadata();
-            }
-        }
-        return null;
     }
 
     public void deleteChunkFile(String fileId, int chunkNo) {
@@ -206,8 +159,28 @@ public class FileManager implements Serializable {
         files.remove(fileId);
     }
 
+    public void deleteChunk(String fileId, int chunkNo) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            file.getChunks().remove(chunkNo);
+        }
+    }
+
     public void addUsedSpace(int diff) {
         usedSpace += diff;
+    }
+
+    public void save(int serverId) throws IOException {
+        FileOutputStream fileOut = new FileOutputStream(FileManagerConstants.PATH + FileManagerConstants.METADATA_FILENAME + serverId);
+        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        out.writeObject(this);
+        out.close();
+        fileOut.close();
+        IOUtils.log("Saving file metadata...");
+    }
+
+    public FileData getFile(String fileId) {
+        return files.get(fileId);
     }
 
     public ChunkData getChunk(String fileId, int chunkNo) {
@@ -218,6 +191,30 @@ public class FileManager implements Serializable {
         return null;
     }
 
+    public HashMap<Integer, ChunkData> getFileChunks(String fileId) {
+        FileData file = getFile(fileId);
+        if (file != null) {
+            return file.getChunks();
+        }
+        return null;
+    }
+
+    public int getChunkReplicationDegree(String fileId, int chunkNo) {
+        ChunkData chunk = getChunk(fileId, chunkNo);
+        if (chunk != null) {
+            return chunk.getReplicationDegree();
+        }
+        return -1;
+    }
+
+    public int getChunkDesiredReplicationDegree(String fileId, int chunkNo) {
+        ChunkData chunk = getChunk(fileId, chunkNo);
+        if (chunk != null) {
+            return chunk.getDesiredReplicationDegree();
+        }
+        return -1;
+    }
+
     public FileMetadata getFileMetadataByFileId(String fileId) {
         FileData file = getFile(fileId);
         if (file != null) {
@@ -226,11 +223,38 @@ public class FileManager implements Serializable {
         return null;
     }
 
-    public HashMap<Integer, ChunkData> getFileChunks(String fileId) {
-        FileData file = getFile(fileId);
-        if (file != null) {
-            return file.getChunks();
+    public FileMetadata getFileMetadata(String filepath) {
+        for (FileData data : files.values()) {
+            if (data.getMetadata().getFilepath().equals(filepath)) {
+                return data.getMetadata();
+            }
         }
         return null;
+    }
+
+    private String getChunkFileName(String fileId, int chunkNo) {
+        return fileId + "_" + chunkNo;
+    }
+
+    public int getStorageSpace() {
+        return storageSpace;
+    }
+
+    public int getAvailableSpace() {
+        return storageSpace - usedSpace;
+    }
+
+    public ArrayList<Tuple<String, Integer>> getChunksWithReplicationDegreeTooDamnHigh() {
+        ArrayList<Tuple<String, Integer>> chunks = new ArrayList<>();
+        for (String fileId : files.keySet()) {
+            for (int chunkNo : getFileChunks(fileId).keySet()) {
+                int replicationDegree = getChunkReplicationDegree(fileId, chunkNo);
+                int desiredReplicationDegree = getChunkDesiredReplicationDegree(fileId, chunkNo);
+                if (replicationDegree > desiredReplicationDegree) {
+                    chunks.add(new Tuple<>(fileId, chunkNo));
+                }
+            }
+        }
+        return chunks;
     }
 }

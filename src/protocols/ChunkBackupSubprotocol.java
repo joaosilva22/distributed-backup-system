@@ -7,6 +7,7 @@ import communications.MessageHeader;
 import communications.MessageConstants;
 import files.FileManager;
 import utils.IOUtils;
+import utils.Tuple;
 
 import java.net.InetAddress;
 import java.net.DatagramSocket;
@@ -14,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ChunkBackupSubprotocol {
@@ -123,6 +125,47 @@ public class ChunkBackupSubprotocol {
                 if (fileManager.getAvailableSpace() < data.length) {
                     IOUtils.warn("ChunkBackupSubprotocol warning: Not enough space <" + fileId + ", " + chunkNo + ">");
                     return;
+                }
+
+                // Se o tamanho disponivel no fileManager for menor que metade
+                // do tamanho máximo, então eliminar todos os chunks que
+                // estao com um replication degree maior do que o que é
+                // suposto, e enviar um removed para os outros peers
+                if (fileManager.getAvailableSpace() < fileManager.getStorageSpace() / 2) {
+                    ArrayList<Tuple<String, Integer>> chunksToRemove = fileManager.getChunksWithReplicationDegreeTooDamnHigh();
+                    for (Tuple<String, Integer> chunkToRemove : chunksToRemove) {
+                        IOUtils.log("Deleting chunk to free space <" + fileId + ", " + chunkNo + ">");
+                        fileManager.deleteChunkFile(fileId, chunkNo);
+                        fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
+                        fileManager.deleteChunk(fileId, chunkNo);
+
+                        MessageHeader removedHeader = new MessageHeader()
+                            .setMessageType(MessageConstants.MessageType.REMOVED)
+                            .setVersion(version)
+                            .setSenderId(serverId)
+                            .setFileId(fileId)
+                            .setChunkNo(chunkNo);
+
+                        Message removed = new Message()
+                            .addHeader(removedHeader);
+
+                        try {
+                            InetAddress inetaddress = InetAddress.getByName(mcAddr);
+                            DatagramSocket socket = new DatagramSocket();
+                            byte[] buf = removed.getBytes();
+                            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
+                            socket.send(packet);
+                        } catch (UnknownHostException e) {
+                            IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        } catch (SocketException e) {
+                            IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }            
             try {
