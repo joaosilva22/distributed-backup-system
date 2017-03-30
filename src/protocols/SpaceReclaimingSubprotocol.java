@@ -45,8 +45,12 @@ public class SpaceReclaimingSubprotocol {
         IOUtils.log("Received REMOVED <" + fileId + ", " + chunkNo + ">");
 
         if (senderId != serverId) {        
-            if (fileManager.getChunk(fileId, chunkNo) != null && fileManager.getFileMetadata(fileId) == null) {
-                fileManager.decreaseReplicationDegree(senderId, fileId, chunkNo);            
+            if (fileManager.getChunk(fileId, chunkNo) != null) {
+                fileManager.decreaseReplicationDegree(senderId, fileId, chunkNo);
+                if (fileManager.getFileMetadata() != null) {
+                    System.out.println("Am the owner");
+                    return;
+                }
                 int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
                 int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             
