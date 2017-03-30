@@ -43,86 +43,88 @@ public class SpaceReclaimingSubprotocol {
         int chunkNo = requestHeader.getChunkNo();
 
         IOUtils.log("Received REMOVED <" + fileId + ", " + chunkNo + ">");
-        
-        if (fileManager.getChunk(fileId, chunkNo) != null) {
-            fileManager.decreaseReplicationDegree(senderId, fileId, chunkNo);            
-            int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
-            int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
+
+        if (senderId != serverId) {        
+            if (fileManager.getChunk(fileId, chunkNo) != null) {
+                fileManager.decreaseReplicationDegree(senderId, fileId, chunkNo);            
+                int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
+                int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             
-            if (replicationDegree < desiredReplicationDegree) {
-                outgoing.add(new Tuple<>(fileId, chunkNo));
-                int delay = ThreadLocalRandom.current().nextInt(0, 401); // TODO: Isto devia ser uma constante
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                    IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
-                    e.printStackTrace();
-                }
-                if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
-                    return;
-                }
-                
-                byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
-                boolean done = false;
-                int iteration = 0;
-                delay = 1000; // TODO: Isto devia ser uma constante
-
-                while (!done && iteration < 5) {
-                    MessageHeader header = new MessageHeader()
-                        .setMessageType(MessageConstants.MessageType.PUTCHUNK)
-                        .setVersion(version)
-                        .setSenderId(serverId)
-                        .setFileId(fileId)
-                        .setChunkNo(chunkNo)
-                        .setReplicationDeg(desiredReplicationDegree);
-
-                    MessageBody body = new MessageBody()
-                        .setContent(data);
-
-                    Message message = new Message()
-                        .addHeader(header)
-                        .setBody(body);
-
-                    try {
-                        InetAddress inetaddress = InetAddress.getByName(mcAddr);
-                        DatagramSocket socket = new DatagramSocket();
-                        byte[] buf = message.getBytes();
-                        DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
-                        socket.send(packet);
-                    } catch (UnknownHostException e) {
-                        IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
-                        e.printStackTrace();
-                    } catch (SocketException e) {
-                        IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
-                        e.printStackTrace();
-                    }
-
+                if (replicationDegree < desiredReplicationDegree) {
+                    outgoing.add(new Tuple<>(fileId, chunkNo));
+                    int delay = ThreadLocalRandom.current().nextInt(0, 401); // TODO: Isto devia ser uma constante
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
                         IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
                         e.printStackTrace();
                     }
+                    if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                        return;
+                    }
+                
+                    byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
+                    boolean done = false;
+                    int iteration = 0;
+                    delay = 1000; // TODO: Isto devia ser uma constante
 
-                    replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
-                    desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
-                    if (replicationDegree >= desiredReplicationDegree) {
-                        done = true;
-                    } else {
-                        iteration += 1;
-                        delay *= 2;
-                        if (iteration < 5) {
-                            IOUtils.warn("Failed to hit target replication deg, retrying <" + fileId + ", " + chunkNo + ">");
+                    while (!done && iteration < 5) {
+                        MessageHeader header = new MessageHeader()
+                            .setMessageType(MessageConstants.MessageType.PUTCHUNK)
+                            .setVersion(version)
+                            .setSenderId(serverId)
+                            .setFileId(fileId)
+                            .setChunkNo(chunkNo)
+                            .setReplicationDeg(desiredReplicationDegree);
+
+                        MessageBody body = new MessageBody()
+                            .setContent(data);
+
+                        Message message = new Message()
+                            .addHeader(header)
+                            .setBody(body);
+
+                        try {
+                            InetAddress inetaddress = InetAddress.getByName(mcAddr);
+                            DatagramSocket socket = new DatagramSocket();
+                            byte[] buf = message.getBytes();
+                            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mcPort);
+                            socket.send(packet);
+                        } catch (UnknownHostException e) {
+                            IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        } catch (SocketException e) {
+                            IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            Thread.sleep(delay);
+                        } catch (InterruptedException e) {
+                            IOUtils.err("SpaceReclaimingSubprotocol error: " + e.toString());
+                            e.printStackTrace();
+                        }
+
+                        replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
+                        desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
+                        if (replicationDegree >= desiredReplicationDegree) {
+                            done = true;
                         } else {
-                            IOUtils.warn("Failed to hit target replication deg, aborting <" + fileId + ", " + chunkNo + ">");
+                            iteration += 1;
+                            delay *= 2;
+                            if (iteration < 5) {
+                                IOUtils.warn("Failed to hit target replication deg, retrying <" + fileId + ", " + chunkNo + ">");
+                            } else {
+                                IOUtils.warn("Failed to hit target replication deg, aborting <" + fileId + ", " + chunkNo + ">");
+                            }
                         }
                     }
-                }
-                if (done) {
-                    IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+                    if (done) {
+                        IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+                    }
                 }
             }
         }

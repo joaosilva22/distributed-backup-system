@@ -134,17 +134,19 @@ public class ChunkBackupSubprotocol {
                 if (fileManager.getAvailableSpace() < fileManager.getStorageSpace() / 2) {
                     ArrayList<Tuple<String, Integer>> chunksToRemove = fileManager.getChunksWithReplicationDegreeTooDamnHigh();
                     for (Tuple<String, Integer> chunkToRemove : chunksToRemove) {
-                        IOUtils.log("Deleting chunk to free space <" + fileId + ", " + chunkNo + ">");
-                        fileManager.deleteChunkFile(fileId, chunkNo);
-                        fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
-                        fileManager.deleteChunk(fileId, chunkNo);
+                        String fileIdToRemove = chunkToRemove.x;
+                        int chunkNoToRemove = chunkToRemove.y;
+                        IOUtils.log("Deleting chunk to free space <" + fileIdToRemove + ", " + chunkNoToRemove + ">");
+                        fileManager.deleteChunkFile(fileIdToRemove, chunkNoToRemove);
+                        fileManager.addUsedSpace(fileManager.getChunk(fileIdToRemove, chunkNoToRemove).getSize() * -1);
+                        fileManager.deleteChunk(fileIdToRemove, chunkNoToRemove);
 
                         MessageHeader removedHeader = new MessageHeader()
                             .setMessageType(MessageConstants.MessageType.REMOVED)
                             .setVersion(version)
                             .setSenderId(serverId)
-                            .setFileId(fileId)
-                            .setChunkNo(chunkNo);
+                            .setFileId(fileIdToRemove)
+                            .setChunkNo(chunkNoToRemove);
 
                         Message removed = new Message()
                             .addHeader(removedHeader);
