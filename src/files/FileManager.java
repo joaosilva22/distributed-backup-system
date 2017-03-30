@@ -259,7 +259,10 @@ public class FileManager implements Serializable {
     }
 
     public void reclaimStorageSpace(int amount) {
-        storageSpace -= amount;
+        if (amount <= storageSpace) {
+            storageSpace -= amount;
+        }
+        storageSpace = 0;
     }
 
     public Tuple<String, Integer> getChunkWithHighestReplicationDegree() {
