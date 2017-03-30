@@ -82,6 +82,9 @@ public class SpaceReclaimingSubprotocol {
 
         while (fileManager.getAvailableSpace() < 0) {
             Tuple<String, Integer> chunkToRemove = fileManager.getChunkWithHighestReplicationDegree();
+            if (chunkToRemove == null) {
+                break;
+            }
             String fileIdToRemove = chunkToRemove.x;
             int chunkNoToRemove = chunkToRemove.y;
             

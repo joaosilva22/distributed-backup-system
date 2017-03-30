@@ -266,7 +266,7 @@ public class FileManager implements Serializable {
     }
 
     public Tuple<String, Integer> getChunkWithHighestReplicationDegree() {
-        Tuple<String, Integer> chunk = new Tuple<>("", 0);
+        Tuple<String, Integer> chunk = null;
         int max = 0;
         for (String fileId : files.keySet()) {
             for (int chunkNo : getFileChunks(fileId).keySet()) {
