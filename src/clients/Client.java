@@ -68,8 +68,8 @@ public class Client implements ClientInterface{
         }
 
         Registry registry = null;
+        Client client = new Client();
         try {
-            Client client = new Client();
             Callback stubClient = (Callback) UnicastRemoteObject.exportObject(client,0);
             try{
                 registry = LocateRegistry.createRegistry(RMI_PORT);
@@ -94,6 +94,13 @@ public class Client implements ClientInterface{
                     break;
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try{
+            registry.unbind("client");
+            UnicastRemoteObject.unexportObject(client,false);
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
