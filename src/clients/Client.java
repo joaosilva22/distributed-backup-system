@@ -8,7 +8,7 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Client implements ClientInterface{
+public class Client implements ClientInterface {
     private static final int RMI_PORT = 1099;
 
     public Client() {}
@@ -21,6 +21,7 @@ public class Client implements ClientInterface{
         String peer_ap = args[0];
         String protocol = args[1];
         String filepath;
+        int amount;
         int replication;
         switch (protocol) {
             case "BACKUP":
@@ -36,14 +37,21 @@ public class Client implements ClientInterface{
                     System.out.println("Usage: java Client <peer_ap> RESTORE <file_path>");
                     return;
                 }
-                filepath = args[3];
+                filepath = args[2];
                 break;
             case "DELETE":
                 if (args.length != 3) {
                     System.out.println("Usage: java Client <peer_ap> DELETE <file_path>");
                     return;
                 }
-                filepath = args[3];
+                filepath = args[2];
+                break;
+            case "RECLAIM":
+                if(args.length != 2) {
+                    System.out.println("Usage: java Client <peer_ap> RECLAIM <amount>");
+                    return;
+                }
+                amount = Integer.parseInt(args[2]);
                 break;
             default:
                 System.out.println("Usage: java Client <peer_ap> <operation> <opnd_1> <opnd_2>");
@@ -54,12 +62,12 @@ public class Client implements ClientInterface{
         Client client = new Client();
         try {
             ClientInterface stubClient = (ClientInterface) UnicastRemoteObject.exportObject(client,0);
-            try{
+            try {
                 registry = LocateRegistry.createRegistry(RMI_PORT);
             } catch (ExportException e) {
                 registry = LocateRegistry.getRegistry();
             }
-            try{
+            try {
                 registry.bind("client", stubClient);
             } catch (AlreadyBoundException e) {
                 e.printStackTrace();
@@ -75,15 +83,18 @@ public class Client implements ClientInterface{
                 case "DELETE":
                     backup.deleteFile(filepath);
                     break;
+                case "RECLAIM":
+                    backup.reclaimSpace(amount);
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        try{
+        try {
             registry.unbind("client");
             UnicastRemoteObject.unexportObject(client,false);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
