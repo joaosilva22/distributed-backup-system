@@ -20,9 +20,9 @@ public class Client implements ClientInterface {
         }
         String peer_ap = args[0];
         String protocol = args[1];
-        String filepath;
-        int amount;
-        int replication;
+        String filepath = null;
+        int amount = -1;
+        int replication = -1;
         switch (protocol) {
             case "BACKUP":
                 if (args.length != 4) {
