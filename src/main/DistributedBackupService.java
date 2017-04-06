@@ -47,7 +47,7 @@ public class DistributedBackupService {
         this.mcPort = mcPort;
         this.mdbAddr = mdbAddr;
         this.mdbPort = mdbPort;
-        this.mdrAddr = mdbAddr;
+        this.mdrAddr = mdrAddr;
         this.mdrPort = mdrPort;
         
         queue = new ConcurrentLinkedQueue<>();
