@@ -1,29 +1,12 @@
 package clients;
 
-import java.rmi.registry.LocateRegistry;
+import services.BackupServiceInterface;
 import java.rmi.registry.Registry;
-
-public class Client {
-    private Client() {}
-
-    public static void main(String[] args ) {
-        //TODO -> Verificações
-
-        try{
-            Registry registry = LocateRegistry.getRegistry(host);
-        }catch(Exception e){
-            System.err.println("Client exception: ");
-            e.printStackTrace();
-        }
-    }
-}
-
-package clients;
-
-        import services.BackupServiceInterface;
-
-        import java.rmi.registry.Registry;
-        import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.RemoteException;
+import java.rmi.AlreadyBoundException;
+import java.rmi.server.ExportException;
+import java.rmi.server.UnicastRemoteObject;
 
 public class Client implements ClientInterface{
     private static final int RMI_PORT = 1099;
@@ -35,7 +18,7 @@ public class Client implements ClientInterface{
             System.out.println("Usage: java Client <peer_ap> <operation> <opnd_1> <opnd_2>");
             return;
         }
-        String peer_ap = args[0]
+        String peer_ap = args[0];
         String protocol = args[1];
         String filepath;
         int replication;
@@ -70,7 +53,7 @@ public class Client implements ClientInterface{
         Registry registry = null;
         Client client = new Client();
         try {
-            Callback stubClient = (Callback) UnicastRemoteObject.exportObject(client,0);
+            ClientInterface stubClient = (ClientInterface) UnicastRemoteObject.exportObject(client,0);
             try{
                 registry = LocateRegistry.createRegistry(RMI_PORT);
             } catch (ExportException e) {
