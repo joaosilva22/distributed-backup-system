@@ -10,20 +10,22 @@ public class RMITest {
 
     public static void main(String[] args) {
         String protocol = args[0];
-        String filepath = args[1];
         
         try {
             Registry registry = LocateRegistry.getRegistry();
             BackupServiceInterface backup = (BackupServiceInterface) registry.lookup("Backup");
             switch (protocol) {
                 case "PUTCHUNK":
-                    backup.backupFile(filepath, 1);
+                    backup.backupFile(args[1], 1);
                     break;
                 case "GETCHUNK":
-                    backup.restoreFile(filepath);
+                    backup.restoreFile(args[1]);
                     break;
                 case "DELETE":
-                    backup.deleteFile(filepath);
+                    backup.deleteFile(args[1]);
+                    break;
+                case "RECLAIM":
+                    backup.reclaimSpace(Integer.parseInt(args[1]));
                     break;
             }
         } catch (Exception e) {
