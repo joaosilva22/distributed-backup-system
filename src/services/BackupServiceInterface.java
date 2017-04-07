@@ -11,4 +11,6 @@ public interface BackupServiceInterface extends Remote {
     public void deleteFile(String filepath) throws RemoteException;
 
     public void reclaimSpace(int amount) throws RemoteException;
+
+    public String status() throws RemoteException;
 }

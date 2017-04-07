@@ -9,9 +9,11 @@ import protocols.FileDeletionSubprotocol;
 import protocols.SpaceReclaimingSubprotocol;
 import files.FileManager;
 import files.FileMetadata;
+import files.FileData;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.IOException;
 
@@ -111,5 +113,15 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
 
     public void reclaimSpace(int amount) {
         new Thread(() -> spaceReclaimingSubprotocol.reclaim(amount)).start();
+    }
+
+    public String status() {
+        String ret = "";
+        HashMap<String, FileData> backedUpFiles = fileManager.getBackedUpFiles();
+        for (String fileId : backedUpFiles.keySet()) {
+            FileMetadata metadata = fileManager.getFileMetadataByFileId(fileId);
+            ret += metadata.getFilepath() + "\n";
+        }
+        return ret;
     }
 }
