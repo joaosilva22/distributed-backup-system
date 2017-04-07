@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
+import java.io.File;
 
 public class Client implements ClientInterface {
     private static final int RMI_PORT = 1099;
@@ -30,6 +31,11 @@ public class Client implements ClientInterface {
                     return;
                 }
                 filepath = args[2];
+		File file = new File("." + filepath);
+		if(!file.exists() || file.isDirectory()) {
+		    System.out.println("Error: invalid file " + filepath);
+		    return;
+		}
                 replication = Integer.parseInt(args[3]);
                 break;
             case "RESTORE":

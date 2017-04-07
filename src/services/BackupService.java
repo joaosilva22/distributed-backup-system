@@ -119,6 +119,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
     public String status() {
         String ret = "";
         HashMap<String, FileData> backedUpFiles = fileManager.getBackedUpFiles();
+	ret += "\n--------- Backed up files ---------\n\n";
         for (String fileId : backedUpFiles.keySet()) {
             FileMetadata metadata = fileManager.getFileMetadataByFileId(fileId);
             ret += "Pathname = '" + metadata.getFilepath() + "'\n";
@@ -133,14 +134,14 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
 
         HashMap<String, FileData> storedChunks = fileManager.getStoredChunks();
         if (storedChunks.size() != 0) {
-            ret += "\nStored chunks: \n";
+            ret += "\n---------- Stored chunks ----------\n\n";
         }
         for (String fileId : storedChunks.keySet()) {
             HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
-                ret += "\tChunk <" + fileId + ", " + chunkNo + ">\n";
-                ret += "\t\tSize = " + fileManager.getChunkSize(fileId, chunkNo) / 1000.0f + " KByte\n";
-                ret += "\t\tPerceived Replication Degree = " + fileManager.getChunkReplicationDegree(fileId, chunkNo) + "\n";
+                ret += "Chunk <" + fileId + ", " + chunkNo + ">\n";
+                ret += "\tSize = " + fileManager.getChunkSize(fileId, chunkNo) / 1000.0f + " KByte\n";
+                ret += "\tPerceived Replication Degree = " + fileManager.getChunkReplicationDegree(fileId, chunkNo) + "\n";
             }
         }
 
