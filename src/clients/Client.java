@@ -75,7 +75,7 @@ public class Client implements ClientInterface {
             BackupServiceInterface backup = (BackupServiceInterface) registry.lookup("Backup");
             switch (protocol) {
                 case "BACKUP":
-                    backup.backupFile(filepath, 1);
+                    backup.backupFile(filepath, replication);
                     break;
                 case "RESTORE":
                     backup.restoreFile(filepath);
