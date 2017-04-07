@@ -47,7 +47,7 @@ public class Client implements ClientInterface {
                 filepath = args[2];
                 break;
             case "RECLAIM":
-                if(args.length != 2) {
+                if(args.length != 3) {
                     System.out.println("Usage: java Client <peer_ap> RECLAIM <amount>");
                     return;
                 }
@@ -72,7 +72,12 @@ public class Client implements ClientInterface {
             } catch (AlreadyBoundException e) {
                 e.printStackTrace();
             }
-            BackupServiceInterface backup = (BackupServiceInterface) registry.lookup("Backup");
+            BackupServiceInterface backup =null;
+	    try {
+		backup = (BackupServiceInterface) registry.lookup(peer_ap);
+	    } catch (Exception e){
+	        e.printStackTrace();  
+            }
             switch (protocol) {
                 case "BACKUP":
                     backup.backupFile(filepath, replication);
