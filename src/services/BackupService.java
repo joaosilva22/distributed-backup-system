@@ -139,12 +139,12 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
                 ret += "\tChunk <" + fileId + ", " + chunkNo + ">\n";
-                ret += "\t\tSize = " + fileManager.getChunkSize(fileId, chunkNo) + "\n";
+                ret += "\t\tSize = " + fileManager.getChunkSize(fileId, chunkNo) / 1000.0f + " KByte\n";
                 ret += "\t\tPerceived Replication Degree = " + fileManager.getChunkReplicationDegree(fileId, chunkNo) + "\n";
             }
         }
 
-        ret += "\nStorage = (" + fileManager.getUsedSpace() + "/" + fileManager.getStorageSpace() + ")\n";
+        ret += "\nStorage (KByte) = (" + fileManager.getUsedSpace() / 1000.0f + "/" + fileManager.getStorageSpace() / 1000.0f + ")\n";
         return ret;
     }
 }
