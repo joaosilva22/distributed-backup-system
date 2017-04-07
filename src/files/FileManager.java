@@ -244,6 +244,10 @@ public class FileManager implements Serializable {
         return storageSpace - usedSpace;
     }
 
+    public int getUsedSpace() {
+        return usedSpace;
+    }
+
     public ArrayList<Tuple<String, Integer>> getChunksWithReplicationDegreeTooDamnHigh() {
         ArrayList<Tuple<String, Integer>> chunks = new ArrayList<>();
         for (String fileId : files.keySet()) {

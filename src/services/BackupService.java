@@ -143,6 +143,8 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
                 ret += "\t\tPerceived Replication Degree = " + fileManager.getChunkReplicationDegree(fileId, chunkNo) + "\n";
             }
         }
+
+        ret += "\nStorage = (" + fileManager.getUsedSpace() + "/" + fileManager.getStorageSpace() + ")\n";
         return ret;
     }
 }
