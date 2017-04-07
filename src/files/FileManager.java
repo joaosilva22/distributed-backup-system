@@ -263,6 +263,7 @@ public class FileManager implements Serializable {
     }
 
     public void reclaimStorageSpace(int amount) {
+        System.out.println("REMOVING " + amount  + " OF " + storageSpace);
         if (amount <= storageSpace) {
             storageSpace -= amount;
         }
