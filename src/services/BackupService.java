@@ -144,7 +144,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             }
         }
 
-        ret += "\nStorage (KByte) = (" + fileManager.getUsedSpace() / 1000.0f + "/" + fileManager.getStorageSpace() / 1000.0f + ")\n";
+        ret += "\nStorage = (" + fileManager.getUsedSpace() / 1000.0f + "/" + fileManager.getStorageSpace() / 1000.0f + ") KByte\n";
         return ret;
     }
 }
