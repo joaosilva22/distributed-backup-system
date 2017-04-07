@@ -31,7 +31,7 @@ public class Client implements ClientInterface {
                     return;
                 }
                 filepath = args[2];
-		File file = new File("." + filepath);
+		File file = new File(filepath);
 		if(!file.exists() || file.isDirectory()) {
 		    System.out.println("Error: invalid file " + filepath);
 		    return;
