@@ -53,6 +53,12 @@ public class Client implements ClientInterface {
                 }
                 amount = Integer.parseInt(args[2]);
                 break;
+	    case "STATUS":
+                if(args.length != 2) {
+                    System.out.println("Usage: java Client <peer_ap> STATUS");
+                    return;
+                }
+                break;
             default:
                 System.out.println("Usage: java Client <peer_ap> <operation> <opnd_1> <opnd_2>");
                 return;
@@ -91,6 +97,9 @@ public class Client implements ClientInterface {
                 case "RECLAIM":
                     backup.reclaimSpace(amount);
                     break;
+		case "STATUS":
+		    System.out.println(backup.status());
+		    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
