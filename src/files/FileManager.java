@@ -263,11 +263,11 @@ public class FileManager implements Serializable {
     }
 
     public void reclaimStorageSpace(int amount) {
-        System.out.println("REMOVING " + amount  + " OF " + storageSpace);
         if (amount <= storageSpace) {
             storageSpace -= amount;
-        }
-        storageSpace = 0;
+        } else {
+            storageSpace = 0;
+	}
     }
 
     public Tuple<String, Integer> getChunkWithHighestReplicationDegree() {

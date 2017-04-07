@@ -57,7 +57,7 @@ public class Client implements ClientInterface {
                     System.out.println("Usage: java Client <peer_ap> RECLAIM <amount>");
                     return;
                 }
-                amount = Integer.parseInt(args[2]);
+                amount = 1000 * Integer.parseInt(args[2]);
                 break;
 	    case "STATUS":
                 if(args.length != 2) {

@@ -120,6 +120,12 @@ public class SpaceReclaimingSubprotocol {
                 e.printStackTrace();
             }
         }
+	try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("SpaceReclaimingSubprotocol warning: Failed to save metadata " + e.toString());
+            e.printStackTrace();
+        }
     }
 
     public void removed(Message request) {
