@@ -10,6 +10,7 @@ import protocols.SpaceReclaimingSubprotocol;
 import files.FileManager;
 import files.FileMetadata;
 import files.FileData;
+import files.ChunkData;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -120,7 +121,14 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         HashMap<String, FileData> backedUpFiles = fileManager.getBackedUpFiles();
         for (String fileId : backedUpFiles.keySet()) {
             FileMetadata metadata = fileManager.getFileMetadataByFileId(fileId);
-            ret += metadata.getFilepath() + "\n";
+            ret += "Pathname =" + metadata.getFilepath() + "\n";
+            ret += "Backup Service Id =" + serverId + "\n";
+            ret += "Desired Replication Degree =" + fileManager.getChunkDesiredReplicationDegree(fileId, 0);
+            HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
+            for (int chunkNo : chunks.keySet()) {
+                ret += "<" + fileId + ", " + chunkNo + ">";
+                ret += fileManager.getChunkReplicationDegree(fileId, chunkNo);
+            }
         }
         return ret;
     }
