@@ -288,4 +288,18 @@ public class FileManager implements Serializable {
         }
         return backedUpFiles;
     }
+
+    public HashMap<String, FileData> getStoredChunks() {
+        HashMap<String, FileData> storedChunks = new HashMap<>();
+        for (String fileId : files.keySet()) {
+            if (getFileMetadataByFileId(fileId) == null) {
+                storedChunks.put(fileId, files.get(fileId));
+            }
+        }
+        return storedChunks;
+    }
+
+    public int getChunkSize(String fileId, int chunkNo) {
+        return getChunk(fileId, chunkNo).getSize();
+    }
 }
