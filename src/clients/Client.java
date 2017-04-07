@@ -84,10 +84,10 @@ public class Client implements ClientInterface {
             } catch (AlreadyBoundException e) {
                 e.printStackTrace();
             }
-            BackupServiceInterface backup =null;
+            BackupServiceInterface backup = null;
 	    try {
 		backup = (BackupServiceInterface) registry.lookup(peer_ap);
-	    } catch (Exception e){
+	    } catch (Exception e) {
 	        e.printStackTrace();  
             }
             switch (protocol) {
