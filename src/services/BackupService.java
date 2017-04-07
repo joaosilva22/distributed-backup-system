@@ -131,8 +131,10 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             }
         }
 
-        ret += "Stored chunks: \n";
         HashMap<String, FileData> storedChunks = fileManager.getStoredChunks();
+        if (storedChunks.size() != 0) {
+            ret += "\n\nStored chunks: \n";
+        }
         for (String fileId : storedChunks.keySet()) {
             HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
