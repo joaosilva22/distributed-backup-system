@@ -153,15 +153,15 @@ public class DistributedBackupService {
     }
         
     public static void main(String[] args) {
-        if (args.length != 7) {
-            System.out.println("Usage: java DistributedBackupService <server_id> <control_addr> <control_port> <backup_addr> <backup_port> <restore_addr> <restore_port>");
+        if (args.length != 9) {
+            System.out.println("Usage: java DistributedBackupService <version> <server_id> <access_point> <control_addr> <control_port> <backup_addr> <backup_port> <restore_addr> <restore_port>");
             return;
         }
 
         // TODO: Handling dos erros de parsing
         DistributedBackupService service = null;
         try {
-            service = new DistributedBackupService(Integer.parseInt(args[0]), args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
+            service = new DistributedBackupService(Integer.parseInt(args[1]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
             service.init();
         } catch (IOException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());

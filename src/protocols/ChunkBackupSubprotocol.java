@@ -127,10 +127,6 @@ public class ChunkBackupSubprotocol {
                     return;
                 }
 
-                // Se o tamanho disponivel no fileManager for menor que metade
-                // do tamanho máximo, então eliminar todos os chunks que
-                // estao com um replication degree maior do que o que é
-                // suposto, e enviar um removed para os outros peers
                 if (fileManager.getAvailableSpace() < fileManager.getStorageSpace() / 2) {
                     ArrayList<Tuple<String, Integer>> chunksToRemove = fileManager.getChunksWithReplicationDegreeTooDamnHigh();
                     for (Tuple<String, Integer> chunkToRemove : chunksToRemove) {
