@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 public class BackupService extends UnicastRemoteObject implements BackupServiceInterface {
+    private float version;
     private int serverId;
     private FileManager fileManager;
     private ChunkBackupSubprotocol chunkBackupSubprotocol;
@@ -27,6 +28,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
     private SpaceReclaimingSubprotocol spaceReclaimingSubprotocol;
     
     public BackupService(DistributedBackupService service) throws RemoteException {
+        version = service.getVersion();
         chunkBackupSubprotocol = service.getChunkBackupSubprotocol();
         chunkRestoreSubprotocol = service.getChunkRestoreSubprotocol();
         fileDeletionSubprotocol = service.getFileDeletionSubprotocol();
@@ -46,7 +48,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             fileManager.registerChunk(fileId, chunkNo, replicationDeg);
             // TODO: Provavelmente aqui a versao nao devia ser uma constante
             //       mas por outro lado nao sei o que devia ser
-            new Thread(() -> chunkBackupSubprotocol.initPutchunk(1.0f, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
+            new Thread(() -> chunkBackupSubprotocol.initPutchunk(version, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
         }
     }
 
@@ -66,7 +68,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             for (int i = 0; i < numberOfChunks; i++) {
                 if (fileManager.getFile(fileId).getChunk(i).getData() == null) {
                     final int chunkNo = i;
-                    new Thread(() -> chunkRestoreSubprotocol.initGetchunk(1.0f, serverId, fileId, chunkNo)).start();
+                    new Thread(() -> chunkRestoreSubprotocol.initGetchunk(version, serverId, fileId, chunkNo)).start();
                 }
             }
             try {
@@ -109,7 +111,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
 
     public void deleteFile(String filepath) {
         String fileId = FileUtils.getFileId(filepath);
-        new Thread(() -> fileDeletionSubprotocol.initDelete(1.0f, serverId, fileId)).start();
+        new Thread(() -> fileDeletionSubprotocol.initDelete(version, serverId, fileId)).start();
     }
 
     public void reclaimSpace(int amount) {
