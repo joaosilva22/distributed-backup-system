@@ -4,14 +4,10 @@ import services.BackupServiceInterface;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
-import java.rmi.AlreadyBoundException;
-import java.rmi.server.ExportException;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.NotBoundException;
 import java.io.File;
 
-public class Client implements ClientInterface {
-    private static final int RMI_PORT = 1099;
-
+public class Client {
     public Client() {}
 
     public static void main(String[] args) {
@@ -31,11 +27,11 @@ public class Client implements ClientInterface {
                     return;
                 }
                 filepath = args[2];
-		File file = new File(filepath);
-		if(!file.exists() || file.isDirectory()) {
-		    System.out.println("Error: invalid file " + filepath);
-		    return;
-		}
+                File file = new File(filepath);
+                if(!file.exists() || file.isDirectory()) {
+                    System.out.println("Error: invalid file " + filepath);
+                    return;
+                }
                 replication = Integer.parseInt(args[3]);
                 break;
             case "RESTORE":
@@ -59,7 +55,7 @@ public class Client implements ClientInterface {
                 }
                 amount = 1000 * Integer.parseInt(args[2]);
                 break;
-	    case "STATUS":
+            case "STATUS":
                 if(args.length != 2) {
                     System.out.println("Usage: java Client <peer_ap> STATUS");
                     return;
@@ -72,24 +68,10 @@ public class Client implements ClientInterface {
 
         Registry registry = null;
         Client client = new Client();
+        BackupServiceInterface backup = null;
         try {
-            ClientInterface stubClient = (ClientInterface) UnicastRemoteObject.exportObject(client,0);
-            try {
-                registry = LocateRegistry.createRegistry(RMI_PORT);
-            } catch (ExportException e) {
-                registry = LocateRegistry.getRegistry();
-            }
-            try {
-                registry.bind("client", stubClient);
-            } catch (AlreadyBoundException e) {
-                e.printStackTrace();
-            }
-            BackupServiceInterface backup = null;
-	    try {
-		backup = (BackupServiceInterface) registry.lookup(peer_ap);
-	    } catch (Exception e) {
-	        e.printStackTrace();  
-            }
+            registry = LocateRegistry.getRegistry();
+            backup = (BackupServiceInterface) registry.lookup(peer_ap);
             switch (protocol) {
                 case "BACKUP":
                     backup.backupFile(filepath, replication);
@@ -103,27 +85,14 @@ public class Client implements ClientInterface {
                 case "RECLAIM":
                     backup.reclaimSpace(amount);
                     break;
-		case "STATUS":
-		    System.out.println(backup.status());
-		    break;
+                case "STATUS":
+                    System.out.println(backup.status());
+                    break;
             }
-        } catch (Exception e) {
+        } catch (RemoteException e) {
+            e.printStackTrace();  
+        } catch (NotBoundException e) {
             e.printStackTrace();
         }
-
-        try {
-            registry.unbind("client");
-            UnicastRemoteObject.unexportObject(client,false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void Success(String s){
-        System.out.println(s);
-    }
-
-    public void Failure(String s){
-        System.out.println(s);
     }
 }
