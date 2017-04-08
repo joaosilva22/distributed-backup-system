@@ -92,55 +92,54 @@ public class ChunkRestoreSubprotocol {
 
         IOUtils.log("Received GETCHUNK <" + fileId + ", " + chunkNo + ">");
 
-        if (senderId != serverId) {
-            byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
-            if (data != null) {
-                MessageHeader header = new MessageHeader()
-                    .setMessageType(MessageConstants.MessageType.CHUNK)
-                    .setVersion(version)
-                    .setSenderId(serverId)
-                    .setFileId(fileId)
-                    .setChunkNo(chunkNo);
+        if (version == 1.0f) {
+            if (senderId != serverId) {
+                byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
+                if (data != null) {
+                    MessageHeader header = new MessageHeader()
+                        .setMessageType(MessageConstants.MessageType.CHUNK)
+                        .setVersion(version)
+                        .setSenderId(serverId)
+                        .setFileId(fileId)
+                        .setChunkNo(chunkNo);
 
-                MessageBody body = new MessageBody()
-                    .setContent(data);
+                    MessageBody body = new MessageBody()
+                        .setContent(data);
 
-                Message message = new Message()
-                    .addHeader(header)
-                    .setBody(body);
+                    Message message = new Message()
+                        .addHeader(header)
+                        .setBody(body);
 
-                outgoing.add(new Tuple<>(fileId, chunkNo));
-                // TODO: Subsituir isto por uma constante
-                int delay = ThreadLocalRandom.current().nextInt(0, 401);
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
-                    e.printStackTrace();
-                }
-                if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
-                    return;
-                }
-                outgoing.remove(new Tuple<>(fileId, chunkNo));
+                    outgoing.add(new Tuple<>(fileId, chunkNo));
+                    // TODO: Subsituir isto por uma constante
+                    int delay = ThreadLocalRandom.current().nextInt(0, 401);
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                        e.printStackTrace();
+                    }
+                    if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                        return;
+                    }
+                    outgoing.remove(new Tuple<>(fileId, chunkNo));
 
-                try {
-                    // TODO: Estou a criar uma socket de cada vez que inicio um
-                    //       putchunk... Se calhar era melhor receber a socket
-                    //       como argumento?
-                    InetAddress inetaddress = InetAddress.getByName(mdrAddr);
-                    DatagramSocket socket = new DatagramSocket();
-                    byte[] buf = message.getBytes();
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdrPort);
-                    socket.send(packet);
-                } catch (UnknownHostException e) {
-                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
-                    e.printStackTrace();
-                } catch (SocketException e) {
-                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
-                    e.printStackTrace();
+                    try {
+                        InetAddress inetaddress = InetAddress.getByName(mdrAddr);
+                        DatagramSocket socket = new DatagramSocket();
+                        byte[] buf = message.getBytes();
+                        DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdrPort);
+                        socket.send(packet);
+                    } catch (UnknownHostException e) {
+                        IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                        e.printStackTrace();
+                    } catch (SocketException e) {
+                        IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                        e.printStackTrace();
+                    }
                 }
             }
         }
