@@ -63,6 +63,8 @@ public class FileManager implements Serializable {
         ChunkData chunk = file.getChunk(chunkNo);
         if (chunk == null) {
             file.newChunk(chunkNo, replicationDeg);
+        } else {
+            chunk.setDesiredReplicationDegree(replicationDeg);
         }
     }
 

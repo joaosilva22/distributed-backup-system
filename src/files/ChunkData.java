@@ -43,6 +43,10 @@ public class ChunkData implements Serializable {
         return replicationDeg.size();
     }
 
+    public void setDesiredReplicationDegree(int degree) {
+        desiredReplicationDeg = degree;
+    }
+
     public int getDesiredReplicationDegree() {
         return desiredReplicationDeg;
     }
