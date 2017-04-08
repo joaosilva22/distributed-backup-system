@@ -55,9 +55,9 @@ public class Client {
                 }
                 amount = 1000 * Integer.parseInt(args[2]);
                 break;
-            case "STATUS":
+            case "STATE":
                 if(args.length != 2) {
-                    System.out.println("Usage: java Client <peer_ap> STATUS");
+                    System.out.println("Usage: java Client <peer_ap> STATE");
                     return;
                 }
                 break;
@@ -85,7 +85,7 @@ public class Client {
                 case "RECLAIM":
                     backup.reclaimSpace(amount);
                     break;
-                case "STATUS":
+                case "STATE":
                     System.out.println(backup.status());
                     break;
             }
