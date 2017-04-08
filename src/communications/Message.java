@@ -4,20 +4,18 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.net.InetAddress;
 
 public class Message {
+    private InetAddress senderAddress = null;
     private ArrayList<MessageHeader> headers = new ArrayList<>();
     private MessageBody body;
 
     public Message() {}
 
-    public Message(byte[] data) {        
+    public Message(byte[] data) {
         ByteArrayOutputStream header = new ByteArrayOutputStream();
         for (int i = 0; i < data.length; i++) {
-            // TODO: Tem de haver uma maneira melhor de fazer isto...
-            //       Talvez rodear isto com um try catch so para evitar
-            //       acessos a indices fora da array (ou dar throw e lidar
-            //       com o problema noutro lado qualquer ;-D)
             if (data[i] == MessageConstants.CR && data[i + 1] == MessageConstants.LF) {
                 header.write(data[i]);
                 header.write(data[i+1]);
@@ -65,8 +63,6 @@ public class Message {
         return out.toByteArray();
     }
 
-    // NOTE: O message type e o message type do primeiro header?
-    //       Para que servem os outros?
     public String getMessageType() {
         return headers.get(0).getMessageType();
     }
@@ -77,5 +73,9 @@ public class Message {
 
     public ArrayList<MessageHeader> getHeaders() {
         return headers;
+    }
+
+    public void setSenderAddress(InetAddress address) {
+        senderAddress = address;
     }
 }

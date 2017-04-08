@@ -25,9 +25,7 @@ public class ChannelMonitorThread extends Thread {
     }
 
     public void run() {
-        // TODO: Isto provavelmente nao devia ser um ciclo infinito
         while (true) {
-            // TODO: Nao sei se este tamanho para buffers funciona
             byte[] buf = new byte[64 * 1024];
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
@@ -35,6 +33,7 @@ public class ChannelMonitorThread extends Thread {
                 socket.receive(packet);
                 byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
                 Message message = new Message(data);
+                message.setSenderAddress(packet.getAddress());
                 queue.add(message);
             } catch (IOException e) {
                 e.printStackTrace();
