@@ -29,8 +29,10 @@ import java.rmi.server.ExportException;
 
 public class DistributedBackupService {
     private static final int RMI_PORT = 1099;
-    
+
+    private float version;
     private int serverId;
+    private String accessPoint;
     private String mcAddr, mdbAddr, mdrAddr;
     private int mcPort, mdbPort, mdrPort;
     
@@ -41,8 +43,10 @@ public class DistributedBackupService {
     private FileDeletionSubprotocol fileDeletionSubprotocol;
     private SpaceReclaimingSubprotocol spaceReclaimingSubprotocol;
 
-    public DistributedBackupService(int serverId, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) throws IOException, ClassNotFoundException {
+    public DistributedBackupService(float version, int serverId, String accessPoint, String mcAddr, int mcPort, String mdbAddr, int mdbPort, String mdrAddr, int mdrPort) throws IOException, ClassNotFoundException {
+        this.version = version;
         this.serverId = serverId;
+        this.accessPoint = accessPoint;
         this.mcAddr = mcAddr;
         this.mcPort = mcPort;
         this.mdbAddr = mdbAddr;
@@ -87,7 +91,7 @@ public class DistributedBackupService {
             BackupService backup = new BackupService(this);
             try {
                 registry = LocateRegistry.createRegistry(RMI_PORT);
-                registry.bind("Backup", backup);
+                registry.bind(accessPoint, backup);
             } catch (ExportException e) {
                 IOUtils.warn("DistributedBackupService warning: " + e.toString());
                 registry = LocateRegistry.getRegistry(RMI_PORT);
@@ -98,6 +102,10 @@ public class DistributedBackupService {
             IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
         }
+    }
+
+    public float getVersion() {
+        return version;
     }
 
     public int getServerId() {
@@ -161,7 +169,7 @@ public class DistributedBackupService {
         // TODO: Handling dos erros de parsing
         DistributedBackupService service = null;
         try {
-            service = new DistributedBackupService(Integer.parseInt(args[1]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
+            service = new DistributedBackupService(Float.parseFloat(args[0]), Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
             service.init();
         } catch (IOException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());
