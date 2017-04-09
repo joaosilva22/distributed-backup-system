@@ -279,7 +279,8 @@ public class ChunkBackupSubprotocol {
                         }
                     }
                 }
-            }            
+            }
+            boolean previouslyStored = !(fileManager.getChunk(fileId, chunkNo) == null);
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
                 if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
@@ -328,9 +329,11 @@ public class ChunkBackupSubprotocol {
                     e.printStackTrace();
                 }
             } else {
-                fileManager.deleteChunkFile(fileId, chunkNo);
-                fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
-                fileManager.deleteChunk(fileId, chunkNo);
+                if (!previouslyStored) {
+                    fileManager.deleteChunkFile(fileId, chunkNo);
+                    fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
+                    fileManager.deleteChunk(fileId, chunkNo);
+                }
             }
         }
         try {
