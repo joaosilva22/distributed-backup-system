@@ -370,12 +370,14 @@ public class ChunkBackupSubprotocol {
         int chunkNo = requestHeader.getChunkNo();
 
         IOUtils.log("Received (enhanced) STORED <" + fileId + ", " + chunkNo + ">");
+        System.out.println("THIS STORED WAS FROM " + senderId);
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
             int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
             int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             if (replicationDegree >= desiredReplicationDegree) {
+                System.out.println("NOT STORING THE CHUNK ANYMORE");
                 outgoing.remove(new Tuple<>(fileId, chunkNo));
             }
         }
