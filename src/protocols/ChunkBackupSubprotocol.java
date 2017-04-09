@@ -26,6 +26,7 @@ public class ChunkBackupSubprotocol {
     private int serverId;
 
     private Vector<Tuple<String, Integer>> outgoing;
+    private Vector<Vector<Integer>> perceivedReplicationDegrees;
 
     public ChunkBackupSubprotocol(DistributedBackupService service) {
         serverId = service.getServerId();
@@ -376,7 +377,11 @@ public class ChunkBackupSubprotocol {
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
-            int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
+            int index = outgoing.indexOf(new Tuple<>(fileId, chunkNo));
+            if (!perceivedReplicationDegrees.get(index).contains(senderId)) {
+                perceivedReplicationDegrees.get(index).add(senderId);
+            }
+            int replicationDegree = perceivedReplicationDegrees.get(index).size();
             int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             if (replicationDegree >= desiredReplicationDegree) {
                 outgoing.remove(new Tuple<>(fileId, chunkNo));
