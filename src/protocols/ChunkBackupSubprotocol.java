@@ -183,18 +183,17 @@ public class ChunkBackupSubprotocol {
             }
         }
         if (done) {
-            try {
-                fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
-            } catch (NoSuchFileException e) {
-                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
-            } catch (DirectoryNotEmptyException e) {
-                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
-            } catch (IOException e) {
-                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
-            }
             IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
         }
-
+        try {
+            fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+        } catch (NoSuchFileException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+        } catch (DirectoryNotEmptyException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+        }
         try {
             fileManager.save(serverId);
         } catch (IOException e) {

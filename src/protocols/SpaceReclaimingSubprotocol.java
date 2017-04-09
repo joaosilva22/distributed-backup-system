@@ -331,16 +331,16 @@ public class SpaceReclaimingSubprotocol {
                         }
                     }
                     if (done) {
-                        try {
-                            fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
-                        } catch (NoSuchFileException e) {
-                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
-                        } catch (DirectoryNotEmptyException e) {
-                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
-                        } catch (IOException e) {
-                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
-                        }
                         IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+                    }
+                    try {
+                        fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+                    } catch (NoSuchFileException e) {
+                        IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                    } catch (DirectoryNotEmptyException e) {
+                        IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                    } catch (IOException e) {
+                        IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
                     }
                 }
             }
