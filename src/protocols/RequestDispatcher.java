@@ -34,10 +34,20 @@ public class RequestDispatcher extends Thread {
                 if (message != null) {
                     switch (message.getMessageType()) {
                         case MessageConstants.MessageType.PUTCHUNK:
-                            new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
+                            if (version == 1.0f) {
+                                new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
+                            }
+                            if (version == 1.1f) {
+                                new Thread(() -> chunkBackupSubprotocol.enhancedPutchunk(message)).start();s
+                            }
                             break;
                         case MessageConstants.MessageType.STORED:
-                            new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
+                            if (version == 1.0f) {
+                                new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
+                            }
+                            if (version == 1.1f) {
+                                new Thread(() -> chunkBackupSubprotocol.enhancedStored(message)).start();
+                            }
                             break;
                         case MessageConstants.MessageType.GETCHUNK:
                             if (version == 1.0f) {
