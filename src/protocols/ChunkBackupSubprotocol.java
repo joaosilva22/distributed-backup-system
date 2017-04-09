@@ -380,7 +380,6 @@ public class ChunkBackupSubprotocol {
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
             int index = outgoing.indexOf(new Tuple<>(fileId, chunkNo));
-            System.out.println("INDEX IS " + index);
             if (!perceivedReplicationDegrees.get(index).contains(senderId)) {
                 perceivedReplicationDegrees.get(index).add(senderId);
             }
