@@ -171,6 +171,9 @@ public class DistributedBackupService {
         try {
             service = new DistributedBackupService(Float.parseFloat(args[0]), Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
             service.init();
+            // TODO: Se a versão for 1.1, percorrer o resultade de
+            //       getInitPutchunkInfo e iniciar um putchunk para cada um
+            //       dos chunks cuja cena ficou a meio
         } catch (IOException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();

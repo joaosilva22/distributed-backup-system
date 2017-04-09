@@ -312,12 +312,22 @@ public class FileManager implements Serializable {
 
     public void saveInitPutchunkInfo(float version, int senderId, String fileId, int chunkNo, int replicationDegree) throws IOException {
         String data = "" + version + " " + senderId + " " + replicationDegree + " " + chunkNo + " " + fileId;
-        String filepath = FileManagerConstants.PATH + "." + getChunkFileName(fileId, chunkNo);
+        String filepath = FileManagerConstants.PATH + ".temp" + getChunkFileName(fileId, chunkNo);
         FileUtils.createFile(filepath, data.getBytes());
     }
 
     public void deleteInitPutchunkInfo(String fileId, int chunkNo) throws NoSuchFileException, DirectoryNotEmptyException, IOException {
-        String filepath = FileManagerConstants.PATH + "." + getChunkFileName(fileId, chunkNo);
+        String filepath = FileManagerConstants.PATH + ".temp" + getChunkFileName(fileId, chunkNo);
         FileUtils.deleteFile(filepath);
+    }
+
+    public ArrayList<byte[]> getInitPutchunkInfo() throws IOException {
+        ArrayList<File> files = FileUtils.getFilesMatchingRegex(FileManagerConstants.PATH, "^\\.temp.+");
+        ArrayList<byte[]> content = new ArrayList<>();
+        for (File file : files) {
+            byte[] data = FileUtils.readFile(file.getAbsolutePath());
+            content.add(data);
+        }
+        return content;
     }
 }

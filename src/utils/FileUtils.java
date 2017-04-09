@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
@@ -118,5 +119,16 @@ public class FileUtils {
     public static void setFileMetadata(String filepath, FileMetadata metadata) throws IOException {
         FileTime lastModifiedTime = metadata.getLastModifiedTime();
         Files.setLastModifiedTime(Paths.get(filepath), lastModifiedTime);
+    }
+
+    public static ArrayList<File> getFilesMatchingRegex(String directory, String regex) {
+        File[] files = new File(directory).listFiles();
+        ArrayList<File> matchingFiles = new ArrayList<>();
+        for (File file : files) {
+            if (Pattern.matches(regex, file.getName())) {
+                matchingFiles.add(file);
+            }
+        }
+        return matchingFiles;
     }
 }
