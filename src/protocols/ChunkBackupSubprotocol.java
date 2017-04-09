@@ -37,6 +37,7 @@ public class ChunkBackupSubprotocol {
         mcPort = service.getMcPort();
 
         outgoing = new Vector<>();
+        perceivedReplicationDegree = new Vector<>();
     }
 
     public void initPutchunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) {
@@ -286,6 +287,7 @@ public class ChunkBackupSubprotocol {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
                 if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
                     outgoing.add(new Tuple<>(fileId, chunkNo));
+                    perceivedReplicationDegrees.add(new Vector<>);
                 }
             } catch (IOException e) {
                 IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
