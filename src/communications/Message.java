@@ -78,4 +78,8 @@ public class Message {
     public void setSenderAddress(InetAddress address) {
         senderAddress = address;
     }
+
+    public InetAddress getSenderAddress() {
+        return senderAddress;
+    }
 }

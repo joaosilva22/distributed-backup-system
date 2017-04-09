@@ -30,6 +30,7 @@ public class RequestDispatcher extends Thread {
         while (true) {
             if (!queue.isEmpty()) {
                 Message message = queue.poll();
+                float version = message.getHeaders().get(0).getVersion();
                 if (message != null) {
                     switch (message.getMessageType()) {
                         case MessageConstants.MessageType.PUTCHUNK:
@@ -39,10 +40,20 @@ public class RequestDispatcher extends Thread {
                             new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
                             break;
                         case MessageConstants.MessageType.GETCHUNK:
-                            new Thread(() -> chunkRestoreSubprotocol.getchunk(message)).start();
+                            if (version == 1.0) {
+                                new Thread(() -> chunkRestoreSubprotocol.getchunk(message)).start();
+                            }
+                            if (version == 1.1) {
+                                new Thread(() -> chunkRestoreSubprotocol.enhancedGetchunk(message)).start();
+                            }
                             break;
                         case MessageConstants.MessageType.CHUNK:
-                            new Thread(() -> chunkRestoreSubprotocol.chunk(message)).start();
+                            if (version == 1.0) {
+                                new Thread(() -> chunkRestoreSubprotocol.chunk(message)).start();
+                            }
+                            if (version == 1.1) {
+                                System.out.println("Received an enhancedChunk");
+                            }
                             break;
                         case MessageConstants.MessageType.DELETE:
                             new Thread(() -> fileDeletionSubprotocol.delete(message)).start();

@@ -149,6 +149,79 @@ public class ChunkRestoreSubprotocol {
         }
     }
 
+    public void enhancedGetchunk(Message request) {
+        MessageHeader requestHeader = request.getHeaders().get(0);
+        String fileId = requestHeader.getFileId();
+        float version = requestHeader.getVersion();
+        int senderId = requestHeader.getSenderId();
+        int chunkNo = requestHeader.getChunkNo();
+        InetAddress senderAddress = request.getSenderAddress();
+
+        IOUtils.log("Received (enhanced) GETCHUNK <" + fileId + ", " + chunkNo + ">");
+        
+        if (senderId != serverId) {
+            byte[] data = fileManager.retrieveChunkData(fileId, chunkNo);
+            if (data != null) {
+                MessageHeader header = new MessageHeader()
+                    .setMessageType(MessageConstants.MessageType.CHUNK)
+                    .setVersion(version)
+                    .setSenderId(serverId)
+                    .setFileId(fileId)
+                    .setChunkNo(chunkNo);
+
+                MessageBody body = new MessageBody()
+                    .setContent(data);
+
+                Message dummy = new Message()
+                    .addHeader(header);
+
+                Message content = new Message()
+                    .addHeader(header)
+                    .setBody(body);
+
+                outgoing.add(new Tuple<>(fileId, chunkNo));
+                // TODO: Subsituir isto por uma constante
+                int delay = ThreadLocalRandom.current().nextInt(0, 401);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                }
+                if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                    return;
+                }
+                outgoing.remove(new Tuple<>(fileId, chunkNo));
+
+                try {
+                    InetAddress inetaddress = InetAddress.getByName(mdrAddr);
+                    DatagramSocket socket = new DatagramSocket();
+                    byte[] dummyBuf = dummy.getBytes();
+                    byte[] contentBuf = content.getBytes();
+                    DatagramPacket dummyPacket = new DatagramPacket(dummyBuf, dummyBuf.length, inetaddress, mdrPort);
+                    DatagramPacket contentPacket = new DatagramPacket(contentBuf, contentBuf.length, senderAddress, mdrPort);
+                    socket.send(dummyPacket);
+                    socket.send(contentPacket);
+                } catch (UnknownHostException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                } catch (SocketException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkRestoreSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
+    }
+
     public void chunk(Message request) {
         MessageHeader requestHeader = request.getHeaders().get(0);
         String fileId = requestHeader.getFileId();
