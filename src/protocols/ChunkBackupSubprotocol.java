@@ -113,6 +113,82 @@ public class ChunkBackupSubprotocol {
         }
     }
 
+    public void enhancedInitPutchunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) {
+        IOUtils.log("Initiating (enhanced) PUTCHUNK <" + fileId + ", " + chunkNo + ">");
+        boolean done = false;
+        int iteration = 0;
+        // TODO: Substituir este magic number por uma constante
+        int delay = 1000;
+
+        fileManager.saveInitPutchunkInfo(version, senderId, fileId, chunkNo, replicationDegree);
+        
+        // TODO: Substituir este magic number por uma constante
+        while (!done && iteration < 5) {
+            MessageHeader header = new MessageHeader()
+                .setMessageType(MessageConstants.MessageType.PUTCHUNK)
+                .setVersion(version)
+                .setSenderId(senderId)
+                .setFileId(fileId)
+                .setChunkNo(chunkNo)
+                .setReplicationDeg(replicationDeg);
+
+            MessageBody body = new MessageBody()
+                .setContent(data);
+
+            Message message = new Message()
+                .addHeader(header)
+                .setBody(body);
+
+            try {
+                InetAddress inetaddress = InetAddress.getByName(mdbAddr);
+                DatagramSocket socket = new DatagramSocket();
+                byte[] buf = message.getBytes();
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddress, mdbPort);
+                socket.send(packet);
+            } catch (UnknownHostException e) {
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (SocketException e) {
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            } catch (IOException e) {
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            }
+
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
+                e.printStackTrace();
+            }
+            
+            int currentReplicationDeg = fileManager.getChunkReplicationDegree(fileId, chunkNo);
+            if (currentReplicationDeg >= replicationDeg) {
+                done = true;
+            } else {                
+                iteration += 1;
+                delay *= 2;
+                if (iteration < 5) {
+                    IOUtils.warn("Failed to hit target replication deg, retrying <" + fileId + ", " + chunkNo + ">");
+                } else {
+                    IOUtils.warn("Failed to hit target replication deg, aborting <" + fileId + ", " + chunkNo + ">");
+                }
+            }
+        }
+        if (done) {
+            fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+            IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
+        }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: Failed to save metadata " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
     public void putchunk(Message request) {
         // TODO: O version da mensagem nao esta a ser utilizado para nada
         //       para ja...

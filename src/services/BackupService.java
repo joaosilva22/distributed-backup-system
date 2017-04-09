@@ -48,7 +48,12 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             fileManager.registerChunk(fileId, chunkNo, replicationDeg);
             // TODO: Provavelmente aqui a versao nao devia ser uma constante
             //       mas por outro lado nao sei o que devia ser
-            new Thread(() -> chunkBackupSubprotocol.initPutchunk(version, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
+            if (version == 1.0f) {
+                new Thread(() -> chunkBackupSubprotocol.initPutchunk(version, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
+            }
+            if (version == 1.1f) {
+                new Thread(() -> chunkBackupSubprotocol.enhancedInitPutchunk(version, serverId, fileId, chunkNo, replicationDeg, chunk)).start();
+            }
         }
     }
 
