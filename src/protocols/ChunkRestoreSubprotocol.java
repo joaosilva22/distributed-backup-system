@@ -202,6 +202,7 @@ public class ChunkRestoreSubprotocol {
                     DatagramPacket contentPacket = new DatagramPacket(contentBuf, contentBuf.length, senderAddress, mdrPort);
                     socket.send(dummyPacket);
                     socket.send(contentPacket);
+                    System.out.println("SENT ALL THE THINGS");
                 } catch (UnknownHostException e) {
                     IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
                     e.printStackTrace();

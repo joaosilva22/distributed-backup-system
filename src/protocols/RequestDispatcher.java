@@ -40,18 +40,18 @@ public class RequestDispatcher extends Thread {
                             new Thread(() -> chunkBackupSubprotocol.stored(message)).start();
                             break;
                         case MessageConstants.MessageType.GETCHUNK:
-                            if (version == 1.0) {
+                            if (version == 1.0f) {
                                 new Thread(() -> chunkRestoreSubprotocol.getchunk(message)).start();
                             }
-                            if (version == 1.1) {
+                            if (version == 1.1f) {
                                 new Thread(() -> chunkRestoreSubprotocol.enhancedGetchunk(message)).start();
                             }
                             break;
                         case MessageConstants.MessageType.CHUNK:
-                            if (version == 1.0) {
+                            if (version == 1.0f) {
                                 new Thread(() -> chunkRestoreSubprotocol.chunk(message)).start();
                             }
-                            if (version == 1.1) {
+                            if (version == 1.1f) {
                                 System.out.println("Received an enhancedChunk");
                             }
                             break;
