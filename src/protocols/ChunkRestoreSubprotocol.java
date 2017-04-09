@@ -202,7 +202,6 @@ public class ChunkRestoreSubprotocol {
                     DatagramPacket contentPacket = new DatagramPacket(contentBuf, contentBuf.length, senderAddress, mdrPort);
                     socket.send(dummyPacket);
                     socket.send(contentPacket);
-                    System.out.println("SENT ALL THE THINGS");
                 } catch (UnknownHostException e) {
                     IOUtils.err("ChunkRestoreSubprotocol error: " + e.toString());
                     e.printStackTrace();
@@ -237,6 +236,30 @@ public class ChunkRestoreSubprotocol {
             outgoing.remove(new Tuple<>(fileId, chunkNo));
         }
         if (incoming.contains(new Tuple<>(fileId, chunkNo))) {
+            fileManager.recoverChunk(fileId, chunkNo, data);
+            incoming.remove(new Tuple<>(fileId, chunkNo));
+        }
+
+        try {
+            fileManager.save(serverId);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkRestoreSubprotocol warning: Failed to save metadata" + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    public void enchancedChunk(Message request) {
+        MessageHeader requestHeader = request.getHeaders().get(0);
+        String fileId = requestHeader.getFileId();
+        int chunkNo = requestHeader.getChunkNo();
+        byte[] data = request.getBody().getBytes();
+        
+        IOUtils.log("Received CHUNK <" + fileId + ", " + chunkNo + ">");
+
+        if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+            outgoing.remove(new Tuple<>(fileId, chunkNo));
+        }
+        if (incoming.contains(new Tuple<>(fileId, chunkNo)) && data != null) {
             fileManager.recoverChunk(fileId, chunkNo, data);
             incoming.remove(new Tuple<>(fileId, chunkNo));
         }

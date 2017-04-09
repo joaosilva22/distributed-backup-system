@@ -52,7 +52,7 @@ public class RequestDispatcher extends Thread {
                                 new Thread(() -> chunkRestoreSubprotocol.chunk(message)).start();
                             }
                             if (version == 1.1f) {
-                                System.out.println("Received an enhancedChunk");
+                                new Thread(() -> chunkRestoreSubprotocol.enchancedChunk(message)).start();
                             }
                             break;
                         case MessageConstants.MessageType.DELETE:
