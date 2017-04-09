@@ -37,7 +37,7 @@ public class ChunkBackupSubprotocol {
         mcPort = service.getMcPort();
 
         outgoing = new Vector<>();
-        perceivedReplicationDegree = new Vector<>();
+        perceivedReplicationDegrees = new Vector<>();
     }
 
     public void initPutchunk(float version, int senderId, String fileId, int chunkNo, int replicationDeg, byte[] data) {
