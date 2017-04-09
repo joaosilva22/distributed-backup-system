@@ -78,6 +78,7 @@ public class FileDeletionSubprotocol {
                 IOUtils.log("Deleted file " + fileId);
                 fileManager.deleteChunkFile(fileId, chunkNo);
                 fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
+                fileManager.deleteChunk(fileId, chunkNo);
             }
             fileManager.deleteFile(fileId);
         }

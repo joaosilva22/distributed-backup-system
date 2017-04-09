@@ -329,6 +329,7 @@ public class ChunkBackupSubprotocol {
                 }
             } else {
                 fileManager.deleteChunkFile(fileId, chunkNo);
+                fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
                 fileManager.deleteChunk(fileId, chunkNo);
             }
         }
