@@ -125,7 +125,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
         for (String fileId : backedUpFiles.keySet()) {
             FileMetadata metadata = fileManager.getFileMetadataByFileId(fileId);
             ret += "Pathname = '" + metadata.getFilepath() + "'\n";
-            ret += "\tBackup Service Id = " + serverId + "\n";
+            ret += "\tFile Id = " + fileId + "\n";
             ret += "\tDesired Replication Degree = " + fileManager.getChunkDesiredReplicationDegree(fileId, 0) + "\n";
             HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
