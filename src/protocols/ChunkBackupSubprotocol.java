@@ -282,7 +282,9 @@ public class ChunkBackupSubprotocol {
             }            
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
-                outgoing.add(new Tuple<>(fileId, chunkNo));
+                if (!outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                    outgoing.add(new Tuple<>(fileId, chunkNo));
+                }
             } catch (IOException e) {
                 IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
