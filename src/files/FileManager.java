@@ -310,13 +310,13 @@ public class FileManager implements Serializable {
         return getChunk(fileId, chunkNo).getSize();
     }
 
-    public void saveInitPutchunkInfo(float version, int senderId, String fileId, int chunkNo, int replicationDegree) {
+    public void saveInitPutchunkInfo(float version, int senderId, String fileId, int chunkNo, int replicationDegree) throws IOException {
         String data = "" + version + " " + senderId + " " + replicationDegree + " " + chunkNo + " " + fileId;
         String filepath = FileManagerConstants.PATH + "." + getChunkFileName(fileId, chunkNo);
-        FileUtils.createFile(filepath, data.getBytes()s);
+        FileUtils.createFile(filepath, data.getBytes());
     }
 
-    public void deleteInitPutchunkInfo(String fileId, int chunkNo) {
+    public void deleteInitPutchunkInfo(String fileId, int chunkNo) throws NoSuchFileException, DirectoryNotEmptyException, IOException {
         String filepath = FileManagerConstants.PATH + "." + getChunkFileName(fileId, chunkNo);
         FileUtils.deleteFile(filepath);
     }

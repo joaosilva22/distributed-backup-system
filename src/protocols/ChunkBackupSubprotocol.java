@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.DirectoryNotEmptyException;
 
 public class ChunkBackupSubprotocol {
     private FileManager fileManager;
@@ -120,7 +122,11 @@ public class ChunkBackupSubprotocol {
         // TODO: Substituir este magic number por uma constante
         int delay = 1000;
 
-        fileManager.saveInitPutchunkInfo(version, senderId, fileId, chunkNo, replicationDegree);
+        try {
+            fileManager.saveInitPutchunkInfo(version, senderId, fileId, chunkNo, replicationDeg);
+        } catch (IOException e) {
+            IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+        }
         
         // TODO: Substituir este magic number por uma constante
         while (!done && iteration < 5) {
@@ -177,7 +183,15 @@ public class ChunkBackupSubprotocol {
             }
         }
         if (done) {
-            fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+            try {
+                fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+            } catch (NoSuchFileException e) {
+                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+            } catch (DirectoryNotEmptyException e) {
+                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+            } catch (IOException e) {
+                IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
+            }
             IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
         }
 

@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.Vector;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.DirectoryNotEmptyException;
 
 public class SpaceReclaimingSubprotocol {
     private FileManager fileManager;
@@ -268,7 +270,11 @@ public class SpaceReclaimingSubprotocol {
                     int iteration = 0;
                     delay = 1000; // TODO: Isto devia ser uma constante
 
-                    fileManager.saveInitPutchunkInfo(version, serverId, fileId, chunkNo, desiredReplicationDegree);
+                    try {
+                        fileManager.saveInitPutchunkInfo(version, serverId, fileId, chunkNo, desiredReplicationDegree);
+                    }  catch (IOException e) {
+                        IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                    }
 
                     while (!done && iteration < 5) {
                         MessageHeader header = new MessageHeader()
@@ -325,7 +331,15 @@ public class SpaceReclaimingSubprotocol {
                         }
                     }
                     if (done) {
-                        fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+                        try {
+                            fileManager.deleteInitPutchunkInfo(fileId, chunkNo);
+                        } catch (NoSuchFileException e) {
+                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                        } catch (DirectoryNotEmptyException e) {
+                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                        } catch (IOException e) {
+                            IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
+                        }
                         IOUtils.log("Successfully stored <" + fileId + ", " + chunkNo + ">");
                     }
                 }
