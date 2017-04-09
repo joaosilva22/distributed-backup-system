@@ -330,7 +330,6 @@ public class ChunkBackupSubprotocol {
                 }
             } else {
                 if (!previouslyStored) {
-                    System.out.println("I AM SERVER " + serverId + " AND I HAVE NEVER STORED THIS CHUNK BEFORE I SWEAR");
                     fileManager.deleteChunkFile(fileId, chunkNo);
                     fileManager.addUsedSpace(fileManager.getChunk(fileId, chunkNo).getSize() * -1);
                     fileManager.deleteChunk(fileId, chunkNo);
@@ -374,18 +373,15 @@ public class ChunkBackupSubprotocol {
         int chunkNo = requestHeader.getChunkNo();
 
         IOUtils.log("Received (enhanced) STORED <" + fileId + ", " + chunkNo + ">");
-        System.out.println("THIS STORED WAS FROM " + senderId);
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
             int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
             int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             if (replicationDegree >= desiredReplicationDegree) {
-                System.out.println("NOT STORING THE CHUNK ANYMORE " + replicationDegree + "/" + desiredReplicationDegree);
                 outgoing.remove(new Tuple<>(fileId, chunkNo));
             }
         }
-        System.out.println("OUTGOING.SIZE=" + outgoing.size());
         try {
             fileManager.save(serverId);
         } catch (IOException e) {
