@@ -254,7 +254,7 @@ public class ChunkRestoreSubprotocol {
         int chunkNo = requestHeader.getChunkNo();
         byte[] data = request.getBody().getBytes();
         
-        IOUtils.log("Received CHUNK <" + fileId + ", " + chunkNo + ">");
+        IOUtils.log("Received (enhanced) CHUNK <" + fileId + ", " + chunkNo + ">");
 
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
             outgoing.remove(new Tuple<>(fileId, chunkNo));
