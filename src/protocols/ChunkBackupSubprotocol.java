@@ -16,6 +16,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ChunkBackupSubprotocol {
@@ -281,7 +282,7 @@ public class ChunkBackupSubprotocol {
             }            
             try {
                 fileManager.saveChunk(serverId, fileId, chunkNo, replicationDeg, data);
-                outgoing.add(new Tuple<fileId, chunkNo>);
+                outgoing.add(new Tuple<>(fileId, chunkNo));
             } catch (IOException e) {
                 IOUtils.err("ChunkBackupSubprotocol error: " + e.toString());
                 e.printStackTrace();
@@ -306,8 +307,8 @@ public class ChunkBackupSubprotocol {
                 e.printStackTrace();
             }
 
-            if (outgoing.contains(new Tuple<fileId, chunkNo>)) {
-                outgoing.remove(new Tuple<fileId, chunkNo>);s
+            if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
+                    outgoing.remove(new Tuple<>(fileId, chunkNo));
                 try {
                     InetAddress inetaddress = InetAddress.getByName(mcAddr);
                     DatagramSocket socket = new DatagramSocket();
@@ -369,8 +370,8 @@ public class ChunkBackupSubprotocol {
 
         fileManager.incrementReplicationDeg(senderId, fileId, chunkNo);
         if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
-            replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
-            desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
+            int replicationDegree = fileManager.getChunkReplicationDegree(fileId, chunkNo);
+            int desiredReplicationDegree = fileManager.getChunkDesiredReplicationDegree(fileId, chunkNo);
             if (replicationDegree >= desiredReplicationDegree) {
                 outgoing.remove(new Tuple<>(fileId, chunkNo));
             }

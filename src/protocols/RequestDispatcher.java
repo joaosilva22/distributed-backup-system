@@ -38,7 +38,7 @@ public class RequestDispatcher extends Thread {
                                 new Thread(() -> chunkBackupSubprotocol.putchunk(message)).start();
                             }
                             if (version == 1.1f) {
-                                new Thread(() -> chunkBackupSubprotocol.enhancedPutchunk(message)).start();s
+                                new Thread(() -> chunkBackupSubprotocol.enhancedPutchunk(message)).start();
                             }
                             break;
                         case MessageConstants.MessageType.STORED:
