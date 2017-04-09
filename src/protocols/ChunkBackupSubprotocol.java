@@ -310,7 +310,7 @@ public class ChunkBackupSubprotocol {
             }
 
             if (outgoing.contains(new Tuple<>(fileId, chunkNo))) {
-                    outgoing.remove(new Tuple<>(fileId, chunkNo));
+                outgoing.remove(new Tuple<>(fileId, chunkNo));
                 try {
                     InetAddress inetaddress = InetAddress.getByName(mcAddr);
                     DatagramSocket socket = new DatagramSocket();
@@ -379,6 +379,7 @@ public class ChunkBackupSubprotocol {
                 outgoing.remove(new Tuple<>(fileId, chunkNo));
             }
         }
+        System.out.println("OUTGOING.SIZE=" + outgoing.size());
         try {
             fileManager.save(serverId);
         } catch (IOException e) {
