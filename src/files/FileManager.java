@@ -68,7 +68,7 @@ public class FileManager implements Serializable {
         }
     }
 
-    public void saveChunk(int serverId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException {        
+    public synchronized void saveChunk(int serverId, String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException {        
         FileData file = getFile(fileId);
         if (file == null) {
             files.put(fileId, new FileData());
