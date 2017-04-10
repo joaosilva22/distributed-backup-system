@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ChunkRestoreSubprotocol {
     private FileManager fileManager;
     private String mdrAddr, mcAddr;
-    private int mdrPort, mcPort;
+    private int mdrPort, mcPort, unicastPort;
     private int serverId;
 
     private Vector<Tuple<String, Integer>> incoming;
@@ -34,6 +34,7 @@ public class ChunkRestoreSubprotocol {
         mdrPort = service.getMdrPort();
         mcAddr = service.getMcAddr();
         mcPort = service.getMcPort();
+        unicastPort = service.getUnicastPort();
         
         incoming = new Vector<>();
         outgoing = new Vector<>();
@@ -199,7 +200,7 @@ public class ChunkRestoreSubprotocol {
                     byte[] dummyBuf = dummy.getBytes();
                     byte[] contentBuf = content.getBytes();
                     DatagramPacket dummyPacket = new DatagramPacket(dummyBuf, dummyBuf.length, inetaddress, mdrPort);
-                    DatagramPacket contentPacket = new DatagramPacket(contentBuf, contentBuf.length, senderAddress, mdrPort);
+                    DatagramPacket contentPacket = new DatagramPacket(contentBuf, contentBuf.length, senderAddress, unicastPort);
                     socket.send(dummyPacket);
                     socket.send(contentPacket);
                 } catch (UnknownHostException e) {
