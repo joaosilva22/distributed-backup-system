@@ -66,7 +66,15 @@ public class RequestDispatcher extends Thread {
                             }
                             break;
                         case MessageConstants.MessageType.DELETE:
-                            new Thread(() -> fileDeletionSubprotocol.delete(message)).start();
+                            if(version == 1.0f) {
+                                new Thread(() -> fileDeletionSubprotocol.delete(message)).start();
+                            }
+                            if(version == 1.1f) {
+                                new Thread(() -> fileDeletionSubprotocol.enhancedDelete(message)).start();
+                            }
+                            break;
+                        case MessageConstants.MessageType.DELETED:
+                            new Thread(() -> fileDeletionSubprotocol.deleted(message)).start();
                             break;
                         case MessageConstants.MessageType.REMOVED:
                             if (version == 1.0f) {

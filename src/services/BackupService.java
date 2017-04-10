@@ -117,7 +117,12 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
 
     public void deleteFile(String filepath) {
         String fileId = FileUtils.getFileId(filepath);
-        new Thread(() -> fileDeletionSubprotocol.initDelete(version, serverId, fileId)).start();
+        if(version == 1.0f) {
+            new Thread(() -> fileDeletionSubprotocol.initDelete(version, serverId, fileId)).start();
+        }
+        if(version == 1.1f) {
+            new Thread(() -> fileDeletionSubprotocol.initEnhancedDelete(version, serverId, fileId)).start();
+        }
     }
 
     public void reclaimSpace(int amount) {
