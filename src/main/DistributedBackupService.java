@@ -4,7 +4,6 @@ import communications.Message;
 import communications.MessageHeader;
 import communications.MessageBody;
 import communications.ChannelMonitorThread;
-import communications.UnicastMonitorThread;
 import protocols.RequestDispatcher;
 import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
@@ -37,7 +36,6 @@ public class DistributedBackupService {
     private String accessPoint;
     private String mcAddr, mdbAddr, mdrAddr;
     private int mcPort, mdbPort, mdrPort;
-    private int unicastPort;
     
     private static ConcurrentLinkedQueue<Message> queue;
     private FileManager fileManager;
@@ -73,11 +71,6 @@ public class DistributedBackupService {
         chunkRestoreSubprotocol = new ChunkRestoreSubprotocol(this);
         fileDeletionSubprotocol = new FileDeletionSubprotocol(this);
         spaceReclaimingSubprotocol = new SpaceReclaimingSubprotocol(this);
-
-        unicastPort = 8000;
-        while (unicastPort == mcPort || unicastPort == mdbPort || unicastPort == mdrPort) {
-            unicastPort += 1;
-        }
     }
 
     public void init() {
@@ -85,9 +78,6 @@ public class DistributedBackupService {
             new ChannelMonitorThread(mcAddr, mcPort, queue).start();
             new ChannelMonitorThread(mdbAddr, mdbPort, queue).start();
             new ChannelMonitorThread(mdrAddr, mdrPort, queue).start();
-            if (version == 1.1f) {
-                new UnicastMonitorThread(unicastPort, queue).start();
-            }
             new RequestDispatcher(this).start();
         } catch (UnknownHostException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());
@@ -145,10 +135,6 @@ public class DistributedBackupService {
 
     public int getMdrPort() {
         return mdrPort;
-    }
-
-    public int getUnicastPort() {
-        return unicastPort;
     }
 
     public ConcurrentLinkedQueue<Message> getQueue() {
