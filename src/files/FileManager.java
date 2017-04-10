@@ -310,8 +310,8 @@ public class FileManager implements Serializable {
         return getChunk(fileId, chunkNo).getSize();
     }
 
-    public void saveInitPutchunkInfo(float version, int senderId, String fileId, int chunkNo, int replicationDegree) throws IOException {
-        String data = "" + version + " " + senderId + " " + replicationDegree + " " + chunkNo + " " + fileId;
+    public void saveInitPutchunkInfo(float version, int senderId, String fileId, int chunkNo, int replicationDegree, byte[] chunk) throws IOException {
+        String data = "" + version + " " + senderId + " " + replicationDegree + " " + chunkNo + " " + fileId + " " + new String(chunk);
         String filepath = FileManagerConstants.PATH + ".temp" + getChunkFileName(fileId, chunkNo);
         FileUtils.createFile(filepath, data.getBytes());
     }

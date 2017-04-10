@@ -123,7 +123,7 @@ public class ChunkBackupSubprotocol {
         int delay = 1000;
 
         try {
-            fileManager.saveInitPutchunkInfo(version, senderId, fileId, chunkNo, replicationDeg);
+            fileManager.saveInitPutchunkInfo(version, senderId, fileId, chunkNo, replicationDeg, data);
         } catch (IOException e) {
             IOUtils.warn("ChunkBackupSubprotocol warning: " + e.toString()); 
         }

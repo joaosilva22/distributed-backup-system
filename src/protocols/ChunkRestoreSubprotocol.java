@@ -256,7 +256,6 @@ public class ChunkRestoreSubprotocol {
         byte[] data = request.getBody().getBytes();
         
         IOUtils.log("Received (enhanced) CHUNK <" + fileId + ", " + chunkNo + ">");
-        System.out.println("Is data null? " + (data == null));
 
         if (outgoing.contains(new Tuple<>(fileId, chunkNo)) && senderId != serverId) {
             outgoing.remove(new Tuple<>(fileId, chunkNo));

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -171,9 +172,6 @@ public class DistributedBackupService {
         try {
             service = new DistributedBackupService(Float.parseFloat(args[0]), Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
             service.init();
-            // TODO: Se a versão for 1.1, percorrer o resultade de
-            //       getInitPutchunkInfo e iniciar um putchunk para cada um
-            //       dos chunks cuja cena ficou a meio
         } catch (IOException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
@@ -188,5 +186,30 @@ public class DistributedBackupService {
         IOUtils.log("Multicast Control Channel: <" + service.mcAddr + ", " + service.mcPort + ">");
         IOUtils.log("Multicast Data Backup Channel: <" + service.mdbAddr + ", " + service.mdbPort + ">");
         IOUtils.log("Multicast Data Recovery Channel: <" + service.mdrAddr + ", " + service.mdrPort + ">");
+
+        if (Float.parseFloat(args[0]) == 1.1f) {
+            try {
+                ArrayList<byte[]> initPutchunkInfo = service.fileManager.getInitPutchunkInfo();
+                for (byte[] data : initPutchunkInfo) {
+                    String content = new String(data);
+                    String[] parts = content.split(" ");
+                    float version = Float.parseFloat(parts[0]);
+                    int senderId = Integer.parseInt(parts[1]);
+                    int replicationDegree = Integer.parseInt(parts[2]);
+                    int chunkNo = Integer.parseInt(parts[3]);
+                    String fileId = parts[4];
+                    String chunkContent = parts[5];
+                    for (int i = 6; i < parts.length; i++) {
+                        chunkContent += " " + parts[i];
+                    }
+                    byte[] chunk = chunkContent.getBytes();
+                    final DistributedBackupService fService = service;
+                    new Thread(() -> fService.chunkBackupSubprotocol.enhancedInitPutchunk(version, senderId, fileId, chunkNo, replicationDegree, chunk)).start();
+                }
+            } catch (IOException e) {
+                IOUtils.err("DistributedBackupService error: " + e.toString());
+                e.printStackTrace();
+            }
+        }
     }
 }

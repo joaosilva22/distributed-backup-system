@@ -271,7 +271,7 @@ public class SpaceReclaimingSubprotocol {
                     delay = 1000; // TODO: Isto devia ser uma constante
 
                     try {
-                        fileManager.saveInitPutchunkInfo(version, serverId, fileId, chunkNo, desiredReplicationDegree);
+                        fileManager.saveInitPutchunkInfo(version, serverId, fileId, chunkNo, desiredReplicationDegree, data);
                     }  catch (IOException e) {
                         IOUtils.warn("SpaceReclaimingSubprotocol warning: " + e.toString()); 
                     }
