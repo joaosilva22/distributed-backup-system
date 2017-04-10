@@ -76,6 +76,12 @@ public class RequestDispatcher extends Thread {
                                 new Thread(() -> spaceReclaimingSubprotocol.enhancedRemoved(message)).start();
                             }
                             break;
+                        case MessageConstants.MessageType.GETLEASE:
+                            new Thread(() -> fileDeletionSubprotocol.getlease(message)).start();
+                            break;
+                        case MessageConstants.MessageType.LEASE:
+                            new Thread(() -> fileDeletionSubprotocol.lease(message)).start();
+                            break;
                         default:
                             IOUtils.err("RequestDispatcher error: Unknown message type");
                             break;

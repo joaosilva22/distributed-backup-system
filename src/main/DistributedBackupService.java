@@ -9,6 +9,7 @@ import protocols.ChunkBackupSubprotocol;
 import protocols.ChunkRestoreSubprotocol;
 import protocols.FileDeletionSubprotocol;
 import protocols.SpaceReclaimingSubprotocol;
+import protocols.ExtendLeaseTask;
 import services.BackupService;
 import services.BackupServiceInterface;
 import files.FileManager;
@@ -21,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -102,6 +105,12 @@ public class DistributedBackupService {
         } catch (RemoteException e) {
             IOUtils.err("DistributedBackupService error: " + e.toString());
             e.printStackTrace();
+        }
+
+        if (version == 1.1f) {
+            TimerTask extendLeaseTask = new ExtendLeaseTask(this);
+            Timer timer = new Timer(true);
+            timer.scheduleAtFixedRate(extendLeaseTask, FileManagerConstants.LEASE_RENEWAL_PERIOD, FileManagerConstants.LEASE_RENEWAL_PERIOD);
         }
     }
 

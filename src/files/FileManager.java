@@ -331,4 +331,12 @@ public class FileManager implements Serializable {
         }
         return content;
     }
+
+    public boolean hasChunkExpired(String fileId, int chunkNo) {
+        return getChunk(fileId, chunkNo).hasExpired();
+    }
+
+    public void extendChunkLease(String fileId, int chunkNo) {
+        getChunk(fileId, chunkNo).extendLease();
+    }
 }
