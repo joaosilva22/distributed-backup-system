@@ -22,7 +22,6 @@ public class ExtendLeaseTask extends TimerTask {
     }
     
     public void run() {
-        IOUtils.log("Running ExtendLeaseTask");
         HashMap<String, FileData> files = fileManager.getStoredChunks();
         for (String fileId : files.keySet()) {
             ConcurrentHashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);

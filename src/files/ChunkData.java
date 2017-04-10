@@ -85,6 +85,6 @@ public class ChunkData implements Serializable {
     }
 
     public void extendLease() {
-        expires = new Date(new Date().getTime() + 30000);
+        expires = new Date(new Date().getTime() + FileManagerConstants.LEASE_EXTENSION);
     }
 }

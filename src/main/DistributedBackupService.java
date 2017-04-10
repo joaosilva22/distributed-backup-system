@@ -110,7 +110,7 @@ public class DistributedBackupService {
         if (version == 1.1f) {
             TimerTask extendLeaseTask = new ExtendLeaseTask(this);
             Timer timer = new Timer(true);
-            timer.scheduleAtFixedRate(extendLeaseTask, 60 * 1000, 60 * 1000);
+            timer.scheduleAtFixedRate(extendLeaseTask, FileManagerConstants.LEASE_RENEWAL_PERIOD, FileManagerConstants.LEASE_RENEWAL_PERIOD);
         }
     }
 
