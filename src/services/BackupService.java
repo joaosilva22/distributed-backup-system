@@ -16,6 +16,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 
 public class BackupService extends UnicastRemoteObject implements BackupServiceInterface {
@@ -132,7 +133,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             ret += "Pathname = '" + metadata.getFilepath() + "'\n";
             ret += "\tFile Id = " + fileId + "\n";
             ret += "\tDesired Replication Degree = " + fileManager.getChunkDesiredReplicationDegree(fileId, 0) + "\n";
-            HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
+            ConcurrentHashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
                 ret += "\tChunk <" + fileId + ", " + chunkNo + ">\n";
                 ret += "\t\tPerceived Replication Degree = " + fileManager.getChunkReplicationDegree(fileId, chunkNo) + "\n";
@@ -144,7 +145,7 @@ public class BackupService extends UnicastRemoteObject implements BackupServiceI
             ret += "\n---------- Stored chunks ----------\n\n";
         }
         for (String fileId : storedChunks.keySet()) {
-            HashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
+            ConcurrentHashMap<Integer, ChunkData> chunks = fileManager.getFileChunks(fileId);
             for (int chunkNo : chunks.keySet()) {
                 ret += "Chunk <" + fileId + ", " + chunkNo + ">\n";
                 ret += "\tSize = " + fileManager.getChunkSize(fileId, chunkNo) / 1000.0f + " KByte\n";

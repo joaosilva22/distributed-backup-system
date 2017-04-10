@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.DirectoryNotEmptyException;
 
@@ -193,7 +194,7 @@ public class FileManager implements Serializable {
         return null;
     }
 
-    public HashMap<Integer, ChunkData> getFileChunks(String fileId) {
+    public ConcurrentHashMap<Integer, ChunkData> getFileChunks(String fileId) {
         FileData file = getFile(fileId);
         if (file != null) {
             return file.getChunks();

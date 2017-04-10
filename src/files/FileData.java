@@ -2,22 +2,23 @@ package files;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileData implements Serializable {
     private FileMetadata metadata;
-    private HashMap<Integer, ChunkData> chunks;
+    private ConcurrentHashMap<Integer, ChunkData> chunks;
 
     public FileData() {
         metadata = null;
-        chunks = new HashMap<>();
+        chunks = new ConcurrentHashMap<>();
     }
 
     public FileData(FileMetadata metadata) {
         this.metadata = metadata;
-        chunks = new HashMap<>();
+        chunks = new ConcurrentHashMap<>();
     }
 
-    public HashMap<Integer, ChunkData> getChunks() {
+    public ConcurrentHashMap<Integer, ChunkData> getChunks() {
         return chunks;
     }
 
