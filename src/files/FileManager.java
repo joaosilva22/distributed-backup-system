@@ -13,18 +13,17 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.DirectoryNotEmptyException;
 
 public class FileManager implements Serializable {
-    private HashMap<String, FileData> files;
+    private ConcurrentHashMap<String, FileData> files;
     private int storageSpace = FileManagerConstants.MAX_DISK_SPACE;
     private int usedSpace = 0;
     
     public FileManager() {
         new File(FileManagerConstants.PATH).mkdir();
-        files = new HashMap<>();
+        files = new ConcurrentHashMap<>();
     }
 
     public void init() {
