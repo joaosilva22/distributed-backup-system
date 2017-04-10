@@ -13,5 +13,7 @@ public class MessageConstants {
         public static final String CHUNK = "CHUNK";
         public static final String DELETE = "DELETE";
         public static final String REMOVED = "REMOVED";
+        public static final String GETLEASE = "GETLEASE";
+        public static final String LEASE = "LEASE";
     }
 }

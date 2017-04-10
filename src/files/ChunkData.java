@@ -3,12 +3,14 @@ package files;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ChunkData implements Serializable {
     private ArrayList<Integer> replicationDeg;
     private int desiredReplicationDeg;
     private byte[] data;
     private int size;
+    private Date expires = null;
 
     public ChunkData() {}
 
@@ -69,5 +71,20 @@ public class ChunkData implements Serializable {
 
     public byte[] getData() {
         return data;
+    }
+
+    public boolean hasExpired() {
+        if (expires == null) {
+            return true;
+        }
+        Date today = new Date();
+        if (expires.before(today)) {
+            return true;
+        }
+        return false;
+    }
+
+    public void extendLease() {
+        expires = new Date(new Date().getTime() + 30000);
     }
 }

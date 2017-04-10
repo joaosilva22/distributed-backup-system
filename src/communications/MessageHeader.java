@@ -54,6 +54,18 @@ public class MessageHeader {
                 fileId = fields.get(3);
                 chunkNo = Integer.parseInt(fields.get(4));
                 break;
+            case MessageConstants.MessageType.GETLEASE:
+                version = Float.parseFloat(fields.get(1));
+                senderId = Integer.parseInt(fields.get(2));
+                fileId = fields.get(3);
+                chunkNo = Integer.parseInt(fields.get(4));
+                break;
+            case MessageConstants.MessageType.LEASE:
+                version = Float.parseFloat(fields.get(1));
+                senderId = Integer.parseInt(fields.get(2));
+                fileId = fields.get(3);
+                chunkNo = Integer.parseInt(fields.get(4));
+                break;
             default:
                 IOUtils.err("MessageHeader error: Unrecognized message type");
                 break;
